@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="radar-option">
+        <select name="weather_map_layer" id="map_layer" onchange="getSelectedValue()">
+            <option value="temp_new">Temperature</option>
+            <option value="precipitation_new">precipitation</option>
+            <option value="pressure_new">Sea level pressure</option>
+            <option value="wind_new">Wind speed</option>
+            <option value="clouds_new">Clouds</option>
+        </select>
+    
+    </div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Your OpenWeatherMap API key
+        const apiKey = '08e1d68746a3ed8abfd71233a74b98c7';
+
+        // Initialize the map
+        const map = L.map('map').setView([20, 0], 2);
+
+        // Set map bounds
+        const southWest = L.latLng(-85, -180);
+        const northEast = L.latLng(85, 180);
+        const bounds = L.latLngBounds(southWest, northEast);
+
+        map.setMaxBounds(bounds);
+        map.on('drag', function() {
+            map.panInsideBounds(bounds, { animate: false });
+        });
+
+        // Add OpenStreetMap base layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        L.tileLayer(`https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${apiKey}`, {
+            attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+            minZoom: 1,  // Set minimum zoom level
+            maxZoom: 10  // Set maximum zoom level
+        }).addTo(map);
+        function getSelectedValue() {
+            var selectElement = document.getElementById("map_layer");
+            var selectedValue = selectElement.value;
+            // Add OpenWeatherMap tile layer
+            L.tileLayer(`https://tile.openweathermap.org/map/${selectedValue}/{z}/{x}/{y}.png?appid=${apiKey}`, {
+                attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+                minZoom: 1,  // Set minimum zoom level
+                maxZoom: 10  // Set maximum zoom level
+            }).addTo(map);
+        }
+        // Restrict map's zoom levels to match available OpenWeatherMap tiles
+        map.setMinZoom(3);
+        map.setMaxZoom(10);
+    </script>
+</body>
+</html>

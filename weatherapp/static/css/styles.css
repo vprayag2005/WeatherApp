@@ -1,0 +1,844 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins',sans-serif;
+    box-sizing: border-box;
+}
+#nav-colour{
+    background: #00bfa5 !important;
+}
+body{
+    background: #222;
+}
+.dropdown-menu{
+    background: linear-gradient(135deg,#00feba,#5b548a);
+    color: #ebfffc;
+}
+
+.cards{
+    width: 100%;
+    background: linear-gradient(135deg,#00feba,#5b548a);
+    color: #fff;
+    padding: 40px 35px;
+    
+}
+.search{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.search input{
+    border: 0;
+    outline: 0;
+    background: #ebfffc;
+    color: #555;
+    padding: 10px 25px;
+    height: 60px;
+    border-radius: 30px;
+    flex: 1;
+    margin-right: 16px;
+    font-size: 18px;
+}
+.search button{
+    border: 0;
+    outline: 0;
+    background: #ebfffc;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+}
+.search button img{
+    width: 16px;
+}
+.weather-icon{
+    width: 50%;
+    margin-left: 7%;
+}
+.weather h1{
+    font-size: 70px;
+    font-weight: 500;
+    margin-left: 7%;
+}
+.weather h2{
+    font-size: 45px;
+    font-weight: 400;
+    margin-top: -10px;   
+    margin-left: 7%;
+}
+.details{
+    display: flex;
+    justify-content: space-between;
+    padding: 0 25px;
+    margin-top: 50px;
+}
+.col{
+    display: flex;
+    align-items: center;
+    text-align: left;
+}
+.col img{
+    width: 40px;
+    margin-right: 10px;
+}
+.humdity , .wind , .pressure{
+    font-size: 28px;
+    margin-top: -6px;
+}
+.weather-update, .details {
+    width: 50%;
+}
+.weather{
+    display: flex;
+    width: 100%;
+}
+.weather-update{
+    display: flex;
+}
+.weather-left, .weather-right{
+    width: 50%;
+}
+.max, .min, .feels{
+    font-size: 123%;
+    text-align: center;
+    padding: 2%;
+}
+.weather-right{
+    padding-top: 19%;
+    padding-bottom: 11%;
+}
+#container {
+	height: 60vh;
+	display: grid;
+	place-items: center
+}
+#slider-container {
+	height: 300px;
+	width: 85vw;
+	max-width: 1400px;
+	position: relative;
+	overflow: hidden;
+	padding: 20px;
+}
+#slider-container .btn {
+	position: absolute;
+	top: calc(50% - 30px);
+	height: 15px;
+	width: 15px;
+	border-left: 8px solid #696969;
+	border-top: 8px solid #696969;
+	cursor: pointer;
+}
+#slider-container .btn:hover {
+	transform: scale(1.2);
+}
+#slider-container .btn.inactive {
+	border-color: #282828
+}
+#slider-container .btn:first-of-type {
+	transform: rotate(-45deg);
+	left: 10px
+}
+#slider-container .btn:last-of-type {
+	transform: rotate(135deg);
+	right: 10px;
+}
+#slider-container #slider {
+	display: flex;
+	width: 1000%;
+	height: 100%;
+	transition: all .5s;
+}
+#slider-container #slider .slide {
+	height: 90%;
+	margin: auto 10px;
+	background: linear-gradient(135deg,#00feba,#5b548a);
+	border-radius: 5px;
+	box-shadow: 2px 2px 4px 2px white, -2px -2px 4px 2px white;
+	display: grid;
+	place-items: center;
+}
+#slider-container #slider .slide span {
+	color: white;
+	font-size: 50px;
+}
+.hourly-text{
+    font-size: 38px;
+    margin-left: 7%;
+}
+.silde-img{
+    width: 56%;
+}
+.five-days{
+    min-height: 100vh;
+
+}
+#five-day-text li{
+    background: linear-gradient(135deg,#00feba,#5b548a);
+    list-style: none;
+    margin-bottom: 10px;
+    height: 10vh;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between; 
+}
+.fiveday-img{
+    width: 10%;
+}
+.left-content {
+    justify-content: space-between 2px;
+    display: flex;
+    width: 50%;
+    align-items: center; 
+    padding-left: 5%;
+}
+
+.right-content {
+    align-items: center;
+    display: flex;
+    width: 50%;
+    padding-right: 5%;
+    justify-content: end;
+}
+.space-left{
+    padding-left: 10px;
+}
+.space-right{
+    padding-right: 4px;
+}
+
+/* Extra Small devices (phones, 600px and below) */
+@media only screen and (max-width: 600px) {
+    #slider-container #slider .slide {
+		width: calc(10% - 20px);
+	}
+    .cards{
+        overflow-x: hidden;
+        padding: 5vh 2vh;
+    }
+    .search{
+        height: 5vh;
+    }
+    .search input{
+        margin-right: 2vh;
+        font-size: 13px;
+    }
+    .weather{
+        display: block;
+        margin-top: 17%;
+    }
+    .weather-update, .details {
+        width: 100%;
+    }
+    .max, .min, .feels {
+        display: flex;
+        font-size: 4vw;
+        text-align: center;
+        padding-bottom: 5%;
+    }
+    .max-temp, .min-temp, .feel-temp{
+        padding-left: 5%;
+    }
+    .weather-icon {
+        width: 66%;
+        margin-left: 7%;
+    }
+    .weather h1 {
+        font-size: 11vw;
+        font-weight: 500;
+        margin-left: 7%;
+        padding-bottom: 1vh;
+    }
+    .weather h2 {
+        font-size: 9vw;
+        font-weight: 400;
+        margin-top: -7px;
+        margin-left: 7%;
+    }
+    .weather-right{
+        padding-top: 30%;
+    }
+    .details{
+        margin-top: 0;
+        padding: 0;
+        height: 23vh;
+        display: block;
+    }
+
+    .col img {
+        padding-bottom: 3%;
+        width: 13%;
+        margin-right: 15px;
+    }
+    .col{
+        display: flex;
+        align-items: center;
+    }
+    .details-text{
+        padding-right: 4vh;
+        font-size: 7vw;
+    }
+    .humdity, .wind, .pressure {
+        font-size: 6vw;
+        margin-top: -6px;
+    }
+    .humdity{
+        margin-left: 4vh;
+    }
+    .pressure{
+        margin-left: 3vh;
+    }
+    .hourly-text {
+        font-size: 6vw;
+        margin-left: 7%;
+        font-style: oblique;
+    }
+    #container {
+        height: 40vh;
+        display: grid;
+        place-items: center;
+    }
+    .hourly-weather {
+        padding-top: 13vh;
+    }
+    .silde-img {
+        width: 35%;
+    }
+    #five-day-text{
+        font-size: 6vw;
+        margin-left: 7%;
+        font-style: oblique;
+    }
+    .five-days{
+        padding-top: 17vh;
+        min-height: 58vh;
+    }
+    .five-days ul{
+        padding-top: 2vh;
+        font-size: 3vw;
+    }
+    .fiveday-img{
+        width: 25%;
+    }
+    .space-left {
+        padding-left: 1vh;
+    }
+    .left-content {
+        display: flex;
+        width: 50%;
+        align-items: center;
+    }
+    .right-content {
+        align-items: center;
+        display: flex;
+        width: 50%;
+        justify-content: end;
+    }
+    #five-day-text li {
+        background: linear-gradient(135deg, #00feba, #5b548a);
+        list-style: none;
+        margin-bottom: 2vh;
+        height: 6vh;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+}
+
+/* Small devices (portrait tablets and large phones, 600px to 768px) */
+@media only screen and (min-width: 601px) and (max-width: 768px) {
+    #slider-container #slider .slide {
+		width: calc(5% - 20px);
+	}
+    .weather-update{
+        width: 60%;
+    }
+    .cards{
+        overflow-x: hidden;
+    }
+    .weather-icon {
+        width: 91%;
+        margin-left: 7%;
+    }
+    .weather h1 {
+        font-size: 6vw;
+        font-weight: 500;
+        margin-left: 7%;
+    }
+    .details {
+        display: block;
+        padding-top: 6%;
+        padding-bottom: 11%;
+        width: 40%;
+    }
+    .humdity, .wind, .pressure {
+        font-size: 2vw;
+        margin-top: 1%;
+        padding-left: 6%;
+    }
+    .details-text{
+        font-size: 2vw;
+    }
+    .max, .min, .feels {
+        margin-top: 10%;
+        font-size: 2vw;
+        text-align: center;
+        display: flex;
+    }
+    .max-temp,.min-temp,.feel-temp{
+        padding-left: 9%;
+    }
+    .col img {
+        width: 7%;
+        margin-right: 5%;
+    }
+    .col{
+        padding: 6%;
+    }
+    .hourly-text {
+        font-size: 6vw;
+        margin-left: 7%;
+        font-style: oblique;
+    }
+    #container {
+        height: 38vh;
+        display: grid;
+        place-items: center;
+    }
+    .silde-img {
+        width: 39%;
+    }
+    #five-day-text{
+        font-size: 6vw;
+        margin-left: 7%;
+        font-style: oblique;
+    }
+    .five-days{
+        min-height: 62vh;
+        padding-top: 25vh;
+    }
+    .five-days ul{
+        padding-top: 2vh;
+        font-size: 3vw;
+    }
+    .fiveday-img{
+        width: 25%;
+    }
+    .space-left {
+        padding-left: 1vh;
+    }
+    .left-content {
+        display: flex;
+        width: 50%;
+        align-items: center;
+    }
+    .right-content {
+        align-items: center;
+        display: flex;
+        width: 50%;
+        justify-content: end;
+    }
+    .five-days ul li {
+        background: linear-gradient(135deg, #00feba, #5b548a);
+        list-style: none;
+        margin-bottom: 2vh;
+        height: 9vh;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+/* Medium devices (landscape tablets, 769px to 992px) */
+@media only screen and (min-width: 769px) and (max-width: 992px) {
+    #slider-container #slider .slide {
+        width: calc(2% - 20px);
+    }
+    .weather-update{
+        width: 60%;
+    }
+    .cards{
+        overflow-x: hidden;
+    }
+    .weather-icon {
+        width: 91%;
+        margin-left: 7%;
+    }
+    .weather h1 {
+        font-size: 6vw;
+        font-weight: 500;
+        margin-left: 7%;
+    }
+    .details {
+        display: block;
+        padding-top: 6%;
+        padding-bottom: 11%;
+        width: 40%;
+    }
+    .humdity, .wind, .pressure {
+        font-size: 2vw;
+        margin-top: 1%;
+        padding-left: 6%;
+    }
+    .details-text{
+        font-size: 2vw;
+    }
+    .max, .min, .feels {
+        margin-top: 10%;
+        font-size: 2vw;
+        text-align: center;
+        display: flex;
+    }
+    .max-temp,.min-temp,.feel-temp{
+        padding-left: 9%;
+    }
+    .col img {
+        width: 7%;
+        margin-right: 5%;
+    }
+    .col{
+        padding: 6%;
+    }
+    .hourly-text {
+        font-size: 5vw;
+        margin-left: 7%;
+        font-style: oblique;
+    }
+    #container {
+        height: 38vh;
+        display: grid;
+        place-items: center;
+    }
+    .silde-img {
+        width: 72%;
+    }
+    #five-day-text{
+        font-size: 5vw;
+        margin-left: 7%;
+        font-style: oblique;
+    }
+    .five-days{
+        padding-top: 25vh;
+        min-height: 62vh;
+    }
+    .five-days ul{
+        padding-top: 2vh;
+        font-size: 3vw;
+    }
+    .fiveday-img{
+        width: 16%;
+    }
+    .space-left {
+        padding-left: 1vh;
+    }
+    .left-content {
+        display: flex;
+        width: 50%;
+        align-items: center;
+    }
+    .right-content {
+        align-items: center;
+        display: flex;
+        width: 50%;
+        justify-content: end;
+    }
+    .five-days ul li {
+        background: linear-gradient(135deg, #00feba, #5b548a);
+        list-style: none;
+        margin-bottom: 2vh;
+        height: 9vh;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+/* Large devices (laptops/desktops, 993px to 1200px) */
+@media only screen and (min-width: 993px) and (max-width: 1200px) {
+    #slider-container #slider .slide {
+		width: calc(2% - 20px);
+	}
+    .cards{
+        overflow-x: hidden;
+    }
+    .max, .min, .feels {
+        font-size: 2vw;
+        text-align: center;
+        padding: 2%;
+        display: flex;
+    }
+    .max-temp,.min-temp,.feel-temp{
+        padding-left: 4%;
+    }
+    .col img {
+        width: 9%;
+        margin-right: 3%;
+    }
+    .details-text{
+        font-size: 2vw;
+    }
+    .humdity, .wind, .pressure {
+        font-size: 2vw;
+        margin-top: 2px;
+        padding-left: 6%;
+    }
+    .details{
+        padding: 0;
+        display: block;
+    }
+    .col {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        padding: 1vh;
+        padding-left: 9vh;
+        padding-top: 2vh;
+    }
+    .hourly-text {
+        font-size: 4vw;
+        margin-left: 7%;
+        font-style: oblique;
+    }
+    #container {
+        height: 38vh;
+        display: grid;
+        place-items: center;
+    }
+    .silde-img {
+        width: 66%;
+    }
+    .hourly-weather{
+        padding-top: 3vh;
+    }
+    #five-day-text{
+        font-size: 4vw;
+        margin-left: 7%;
+        font-style: oblique;
+    }
+    .five-days{
+        min-height: 62vh;
+        padding-top: 25vh;
+    }
+    .five-days ul{
+        padding-top: 2vh;
+        font-size: 3vw;
+    }
+    .fiveday-img{
+        width: 18%;
+    }
+    .space-left {
+        padding-left: 1vh;
+    }
+    .left-content {
+        display: flex;
+        width: 50%;
+        align-items: center;
+    }
+    .right-content {
+        align-items: center;
+        display: flex;
+        width: 50%;
+        justify-content: end;
+    }
+    .five-days ul li {
+        background: linear-gradient(135deg, #00feba, #5b548a);
+        list-style: none;
+        margin-bottom: 2vh;
+        height: 13vh;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+/* Extra Large devices (large laptops and desktops, 1201px to 1600px) */
+@media only screen and (min-width: 1201px) and (max-width: 1600px) {
+    #slider-container #slider .slide {
+		width: calc(2% - 20px);
+	}
+    .cards{
+        overflow-x: hidden;
+    }
+    .max, .min, .feels {
+        font-size: 2vw;
+        text-align: center;
+        padding: 2%;
+        display: flex;
+    }
+    .max-temp,.min-temp,.feel-temp{
+        padding-left: 4%;
+    }
+    .col img {
+        width: 9%;
+        margin-right: 3%;
+    }
+    .details-text{
+        font-size: 2vw;
+    }
+    .humdity, .wind, .pressure {
+        font-size: 2vw;
+        margin-top: 2px;
+        padding-left: 6%;
+    }
+    .details{
+        padding: 0;
+        display: block;
+    }
+    .col {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        padding: 1vh;
+        padding-left: 9vh;
+        padding-top: 2vh;
+    }
+    .hourly-text {
+        font-size: 4vw;
+        margin-left: 7%;
+        font-style: oblique;
+    }
+    #container {
+        height: 38vh;
+        display: grid;
+        place-items: center;
+    }
+    .silde-img {
+        width: 63%;
+    }
+    #five-day-text{
+        font-size: 4vw;
+        margin-left: 7%;
+        font-style: oblique;
+    }
+    .five-days{
+        min-height: 62vh;
+        padding-top: 25vh;
+    }
+    .five-days ul{
+        padding-top: 2vh;
+        font-size: 2vw;
+    }
+    .fiveday-img{
+        width: 10%;
+    }
+    .space-left {
+        padding-left: 1vh;
+    }
+    .left-content {
+        display: flex;
+        width: 50%;
+        align-items: center;
+    }
+    .right-content {
+        align-items: center;
+        display: flex;
+        width: 50%;
+        justify-content: end;
+    }
+    .five-days ul li {
+        background: linear-gradient(135deg, #00feba, #5b548a);
+        list-style: none;
+        margin-bottom: 2vh;
+        height: 11vh;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+/* Extra Extra Large devices (large desktops and TVs, 1601px and up) */
+@media only screen and (min-width: 1601px) {
+    #slider-container #slider .slide {
+		width: calc(2% - 20px);
+	}
+    .cards{
+        overflow-x: hidden;
+    }
+    .max, .min, .feels {
+        font-size: 2vw;
+        text-align: center;
+        padding: 2%;
+        display: flex;
+    }
+    .max-temp,.min-temp,.feel-temp{
+        padding-left: 4%;
+    }
+    .col img {
+        width: 9%;
+        margin-right: 3%;
+    }
+    .details-text{
+        font-size: 2vw;
+    }
+    .humdity, .wind, .pressure {
+        font-size: 2vw;
+        margin-top: 2px;
+        padding-left: 6%;
+    }
+    .details{
+        padding: 0;
+        display: block;
+    }
+    .col {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        padding: 1vh;
+        padding-left: 9vh;
+        padding-top: 2vh;
+    }
+    .hourly-text {
+        font-size: 4vw;
+        margin-left: 7%;
+        font-style: oblique;
+    }
+    #container {
+        height: 38vh;
+        display: grid;
+        place-items: center;
+    }
+    .silde-img {
+        width: 75%;
+    }
+    #five-day-text{
+        font-size: 4vw;
+        margin-left: 7%;
+        font-style: oblique;
+    }
+    .five-days{
+        min-height: 62vh;
+        padding-top: 25vh;
+    }
+    .five-days ul{
+        padding-top: 2vh;
+        font-size: 3vw;
+    }
+    .fiveday-img{
+        width: 9%;
+    }
+    .space-left {
+        padding-left: 1vh;
+    }
+    .left-content {
+        display: flex;
+        width: 50%;
+        align-items: center;
+    }
+    .right-content {
+        align-items: center;
+        display: flex;
+        width: 50%;
+        justify-content: end;
+    }
+    .five-days ul li {
+        background: linear-gradient(135deg, #00feba, #5b548a);
+        list-style: none;
+        margin-bottom: 2vh;
+        height: 11vh;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+}

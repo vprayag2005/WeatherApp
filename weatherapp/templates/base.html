@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    {% block css_link %}{% endblock  %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-dark " id="nav-colour">
+        <div class="container-fluid">
+          <a class="navbar-brand text-white" href="#">Clima</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse ps-4" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+              <li class="nav-item ps-3">
+                <a class="nav-link active text-white" aria-current="page" href="{% url "home" %}" >Home</a>
+              </li>
+              <li class="nav-item ps-3">
+                <a class="nav-link text-white" href="#">Find Weather</a>
+              </li>
+              <li class="nav-item ps-3">
+                <a class="nav-link text-white" href="#">Alert</a>
+              </li>
+              <li class="nav-item dropdown ps-3">
+                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  News
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="{% url 'global_news' %}">Global News</a></li>
+                  <li><a class="dropdown-item" href="{% url "national_news" %}">National news</a></li>
+                  <li><a class="dropdown-item" href="{% url "Sports" %}">Regional News</a></li>
+                </ul>
+              </li>
+              <li class="nav-item ps-3">
+                <a class="nav-link text-white" href="{% url "radar" %}">Radar</a>
+              </li>
+              <li class="nav-item ps-3">
+                <a class="nav-link text-white" href="#">Settings</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    {% block main_body %}
+    {% endblock  %}
+</body>
+</html>
