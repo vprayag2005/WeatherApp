@@ -6,4 +6,4 @@ class GlobalNews(models.Model):
     img_link=models.URLField(max_length=2083)
     
     def __str__(self) :
-        return self.headline
+        return f'{self.headline}, {self.news_link},{self.img_link}'
