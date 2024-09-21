@@ -9,7 +9,7 @@ def news_national(request):
     print(request)
     return render(request,'national_news.html')
 
-def news(request):
+def globalnews(request):
     return render(request,'global_news.html')
 def news_global(request):
     print(GlobalNews.objects.values('img_link'))
