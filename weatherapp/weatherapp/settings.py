@@ -150,6 +150,6 @@ CELERY_TIMEZONE = 'UTC'
 CELERY_BEAT_SCHEDULE = {
     'run-scraper-every-3-hours': {
         'task': 'newsapp.tasks.run_scraper_task',  # Replace with your actual task name
-        'schedule': timedelta(hours=3),  # Runs every 3 hours
+        'schedule': timedelta(minutes=2),  # Runs every 3 hours
     },
 }

@@ -2,8 +2,6 @@ from django.shortcuts import render
 import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-import pyowm
-from pyowm.owm import OWM
 def radar(request):
     return render(request,'radar.html')
 def index(request):
@@ -32,4 +30,7 @@ def fetch_data(request):
         else:
             return JsonResponse({'error': 'City not provided'}, status=400)
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def settings(request):
+    return render(request,"settings.html")
     

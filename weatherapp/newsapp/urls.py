@@ -4,8 +4,9 @@ from . import views
 urlpatterns = [
     path('globalweathernews/', views.globalnews,name='global_news'),
     path('newsglobal/', views.news_global),
-    path('newsnational/', views.news_national,name='national_news'),
-    path('newssports/', views.tests,name='Sports'),
-    #path('newssports/', ),
+    path('newsnational/', views.news_national),
+    path('nationalweathernews/', views.nationalnews,name='national_news'),
+    path('newskerala/', views.news_kerala),
+    path('keralaweathernews/', views.keralanews,name='kerala_news'),
     
 ]

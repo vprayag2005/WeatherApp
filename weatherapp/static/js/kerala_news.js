@@ -1,7 +1,5 @@
-
 window.onload = function() {
-    console.log("hai")
-    fetch('/news/newsglobal/') // Adjust the URL to match your URL pattern
+    fetch('/news/newskerala/') // Adjust the URL to match your URL pattern
     .then(response => {
         if (response.ok) {
             return response.json(); // Parse JSON if the response is OK
