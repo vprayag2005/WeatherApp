@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from newsapp.models import GlobalNews,NationalNews,KeralaNews
+from newsapp.models import GlobalNews,NationalNews,KeralaNews,KarnatakaNews
 def scrap_global():
     # URL to scrape
     url = "https://edition.cnn.com/weather"
@@ -142,3 +142,25 @@ def scrape_kerala():
             KeralaNews.objects.create(headline=headline,news_link=news_link,img_link=img_link)
         except Exception as e :
             pass
+
+def scrape_news(state):
+    headlines,news_links,pubdates,sources=[],[],[],[]
+    url=f'https://news.google.com/rss/search?q={state}+weather&hl=en-IN&gl=IN&ceid=IN:en'
+    req=requests.get(url)
+    if req.status_code==200:
+        soup=BeautifulSoup(req.content,"xml")
+        item=soup.find_all("item")
+        for i in item:
+            headlines.append(i.find("title").get_text())
+            news_links.append(i.find("link").get_text())
+            pubdates.append(i.find("pubDate").get_text())
+            sources.append(i.find("source").get_text())
+    
+    try:
+        KarnatakaNews.objects.all().delete()
+        for headline,link,date,source in zip(headlines,news_links,pubdates,sources):
+            KarnatakaNews.objects.create(headline=headline,news_link=link,pubDate=date,source=source)
+    except Exception as e:
+        pass
+        
+            

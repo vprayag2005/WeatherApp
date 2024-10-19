@@ -21,4 +21,13 @@ class KeralaNews(models.Model):
     
     def __str__(self) :
         return f'{self.headline}, {self.news_link},{self.img_link}'
+
+class KarnatakaNews(models.Model):
+    headline=models.CharField(max_length=255)
+    news_link=models.URLField(max_length=2083)
+    pubDate=models.CharField(max_length=255)
+    source=models.CharField(max_length=255)
+    
+    def __str__(self) :
+        return f'{self.headline}, {self.news_link},{self.pubDate},{self.source}'
     

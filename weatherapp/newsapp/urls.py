@@ -8,5 +8,7 @@ urlpatterns = [
     path('nationalweathernews/', views.nationalnews,name='national_news'),
     path('newskerala/', views.news_kerala),
     path('keralaweathernews/', views.keralanews,name='kerala_news'),
+    path('karnatakaweathernews/', views.karnatakanews,name='karnataka_news'),
+    path('newskarnataka/', views.news_karnataka),
     
 ]

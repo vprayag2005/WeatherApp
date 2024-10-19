@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from newsapp.models import GlobalNews,NationalNews,KeralaNews
+from newsapp.models import GlobalNews,NationalNews,KeralaNews,KarnatakaNews
 
 def nationalnews(request):
     return render(request,'national_news.html')
@@ -37,5 +37,20 @@ def news_kerala(request):
         'headlines':headlines,
         'images_link': images_link,
         'news_link': news_link,
+    }
+    return JsonResponse(data)
+def karnatakanews(requests):
+    return render(requests,"karnataka_news.html")
+def news_karnataka(request):
+    headlines=list(KarnatakaNews.objects.values('headline'))
+    news_link=list(KarnatakaNews.objects.values('news_link'))
+    pubdates=list(KarnatakaNews.objects.values('pubDate'))
+    sources=list(KarnatakaNews.objects.values('source'))
+    data = {
+        'headlines':headlines,
+        'news_links': news_link,
+        'pubDates': pubdates,
+        'Sources': sources,
+        
     }
     return JsonResponse(data)
