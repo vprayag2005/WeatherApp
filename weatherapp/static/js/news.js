@@ -31,21 +31,18 @@ function news_display(news_url,newstype) {
             
         }
         else{
-            const newslist =document.querySelector(".list-group")
+            const ul =document.querySelector(".ul")
             for (let index = 0; index < data.headlines.length; index++) {
-                const list=document.createElement('div')
-                list.className=('list')
+                const list=document.createElement('li')
                 list.innerHTML=`
-                  <a href="${data.news_links[index].news_link}" class="list-group-item list-group-item-action " aria-current="true">
-                    <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">${data.headlines[index].headline}</h5>
-                    <small>${data.pubDates[index].pubDate}</small>
+                    <div class="date">
+                        <h3>Mar<br><span>06</span></h3>
                     </div>
-                    <small>${data.Sources[index].source}</small>
-                </a>
-                <br>
+                    <a href="${data.news_links[index].news_link}">
+                        <p>${data.headlines[index].headline}</p>
+                    </a>
                 `
-                newslist.append(list)
+                ul.append(list)
                 
             }
         }
