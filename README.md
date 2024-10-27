@@ -18,7 +18,7 @@ This is a personal weather website developed using Django and MySQL, designed to
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone <https://github.com/vprayag2005/WeatherApp.git>
    ```
 2. Navigate to the project directory:
    ```bash
