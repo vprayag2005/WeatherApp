@@ -10,7 +10,7 @@ def index(request):
 def fetch_data(request):
     if request.method == 'POST':
         city = request.POST.get('city')
-        apikey = "08e1d68746a3ed8abfd71233a74b98c7"
+        apikey = ""
         curent_weather_url="https://api.openweathermap.org/data/2.5/weather?&units=metric&q="
         hourlyurl = "https://api.openweathermap.org/data/2.5/forecast?&units=metric&q="
         print(city)
