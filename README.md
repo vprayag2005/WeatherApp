@@ -51,8 +51,6 @@ This is a personal weather website developed using Django and MySQL, designed to
 ## Contributing
 This project is a personal project and is not open source. However, you can raise issues and provide feedback if you encounter any problems or have suggestions.
 
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgements
 - [Django](https://www.djangoproject.com/) - The web framework used.
