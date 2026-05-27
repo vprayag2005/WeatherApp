@@ -1,57 +1,71 @@
-# Weather Website
+# WeatherApp 🌤️
 
 ## Overview
-This is a personal weather website developed using Django and MySQL, designed to provide users with accurate and up-to-date weather information. The website focuses on India, specifically offering detailed weather forecasts and news updates.
+WeatherApp is a personal weather portal built with **Django** and **MySQL**. It provides Indian users with real‑time weather data, 5‑day forecasts, hourly updates, and region‑specific weather news. The site is designed for simplicity, speed, and easy extensibility.
 
-## Features
-- **Current Weather**: Displays real-time weather conditions for various locations.
-- **5-Day Weather Forecast**: Provides users with a detailed forecast for the upcoming five days.
-- **Hourly Weather**: Offers hourly updates for accurate planning.
-- **News**: Includes global, national, and region-specific weather news. Currently, only Kerala news is included, with plans to expand to other states.
+## Core Features
+- **Current Weather** – Live temperature, humidity, wind, and condition icons for any Indian city.
+- **5‑Day Forecast** – Daily high/low, precipitation chance, and summary.
+- **Hourly Updates** – Fine‑grained hourly view for short‑term planning.
+- **News Feed** – Aggregated weather news; initially focused on Kerala, with plans to expand nationwide.
+- **Responsive UI** – Clean, mobile‑first design using vanilla CSS and JavaScript.
 
-## Future Features
-- **Weather Alerts**: Implement alerts for severe weather conditions, including red alerts sent to user emails.
-- **Nowcast**: Display weather alerts on a map for real-time updates.
-- **National and Regional Weather**: Expand the coverage to include more states.
-- **User Experience Sharing**: Allow users to post their weather experiences and share content.
+## Planned Enhancements
+- **Weather Alerts** – Push red‑alert emails and in‑app notifications for severe weather.
+- **Nowcast Map** – Real‑time alert overlay on an interactive map.
+- **National & State Coverage** – Extend news and forecasts to all Indian states.
+- **Community Stories** – Let users share weather experiences and photos.
 
-## Installation
-1. Clone the repository:
+## Installation & Setup
+1. **Clone the repo**
    ```bash
-   git clone <https://github.com/vprayag2005/WeatherApp.git>
+   git clone https://github.com/vprayag2005/WeatherApp.git
+   cd WeatherApp
    ```
-2. Navigate to the project directory:
-   ```bash
-   cd <project-directory>
-   ```
-3. Set up your virtual environment:
+2. **Create a virtual environment**
    ```bash
    python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   # Windows
+   venv\Scripts\activate
+   # macOS/Linux
+   source venv/bin/activate
    ```
-4. Install the required packages:
+3. **Install dependencies**
    ```bash
    pip install -r requirements.txt
    ```
-5. Set up the database:
-   - Ensure you have MySQL installed and running.
-   - Create a database and update the database settings in `settings.py`.
-   - Run migrations:
-     ```bash
-     python manage.py migrate
-     ```
+4. **Configure the database**
+   - Install MySQL and start the service.
+   - Create a database (e.g., `weatherapp`).
+   - Copy `.env.example` to `.env` and fill in `DB_NAME`, `DB_USER`, `DB_PASSWORD`, etc.
+5. **Run migrations**
+   ```bash
+   python manage.py migrate
+   ```
+6. **Start the development server**
+   ```bash
+   python manage.py runserver
+   ```
+   Visit `http://127.0.0.1:8000/` in your browser.
 
-## Usage
-- Run the development server:
-  ```bash
-  python manage.py runserver
-  ```
-- Access the website at `http://127.0.0.1:8000/`.
+## Docker Deployment (Production)
+We ship a multi‑stage Docker build ready for production:
+```bash
+docker compose up -d --build
+```
+The container runs **Gunicorn** behind **WhiteNoise** for efficient static file handling and uses **Redis** for caching and Celery task queues.
 
 ## Contributing
-This project is a personal project and is not open source. However, you can raise issues and provide feedback if you encounter any problems or have suggestions.
+This project is primarily personal, but contributions are welcome:
+- Open an issue for bugs or feature ideas.
+- Submit a pull request with clear commit messages.
 
+## License
+MIT License – feel free to fork and adapt.
 
 ## Acknowledgements
-- [Django](https://www.djangoproject.com/) - The web framework used.
-- [MySQL](https://www.mysql.com/) - The database used.
+- **Django** – the powerful web framework.
+- **MySQL** – reliable relational database.
+- **Gunicorn** – WSGI HTTP server for production.
+- **WhiteNoise** – static file serving.
+- **Redis** – caching and Celery broker.
