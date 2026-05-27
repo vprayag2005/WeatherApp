@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from home.models import UserSettings
+
+
+@admin.register(UserSettings)
+class UserSettingsAdmin(admin.ModelAdmin):
+    list_display = ("city", "state", "country", "updated_at")
+    search_fields = ("city", "country", "state")

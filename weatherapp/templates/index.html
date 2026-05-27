@@ -1,120 +1,196 @@
 {% extends "base.html" %}
 {% load static %}
+{% block body_attrs %}data-weather-mode="{{ weather_mode }}"{% endblock %}
 {% block css_link %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=1.5">
 {% endblock  %}
 {% block main_body %}
-    <div class="cards">
-        <div class="search">
-            <input type="text" placeholder="Enter city name">
-            <button><img src="{% static "images/search.png" %}"></button>
-        </div>
-        <div class="weather">
-            <div class="weather-update">
-                <div class="weather-left">
-                    <img src="" class="weather-icon">
-                    <h1 class="temp"></h1>
+    <div class="cards weather-dashboard">
+        <section class="dashboard-hero panel-card">
+            <div class="hero-grid">
+                <div class="hero-copy">
+                    <p class="section-kicker">{{ hero_kicker }}</p>
+                    <h1 class="hero-title">{{ hero_title }}</h1>
+                    <p class="hero-description">{{ hero_description }}</p>
+                    <div class="hero-actions">
+                        {% if weather_mode == "home" %}
+                            <button type="button" class="hero-button primary" id="use-location-button">Use my current location</button>
+                            <a class="hero-button secondary" href="{% url 'find_weather' %}">Find weather elsewhere</a>
+                        {% else %}
+                            <a class="hero-button secondary" href="{% url 'home' %}">Back to home forecast</a>
+                        {% endif %}
+                    </div>
+                    <p class="location-status" id="location-status">
+                        {% if weather_mode == "home" %}
+                            Allow browser location access to load your home weather automatically.
+                        {% else %}
+                            Search for any city to see weather outside your home area.
+                        {% endif %}
+                    </p>
+                </div>
+
+                {% if weather_mode == "home" %}
+                    <div class="home-focus-card">
+                        <p class="section-kicker">Saved home</p>
+                        <h2>{{ saved_home_label }}</h2>
+                        <p class="home-focus-copy">Regional news follows your saved state, and home weather can fall back to this saved place when browser location is unavailable.</p>
+                        <div class="home-focus-details">
+                            <div class="home-focus-detail">
+                                <span class="home-focus-label">City</span>
+                                <strong class="home-focus-value">{{ user_settings.city }}</strong>
+                            </div>
+                            <div class="home-focus-detail">
+                                <span class="home-focus-label">State news</span>
+                                <strong class="home-focus-value">{{ user_settings.state }}</strong>
+                            </div>
+                            <div class="home-focus-detail">
+                                <span class="home-focus-label">Fallback forecast</span>
+                                <strong class="home-focus-value">{{ saved_home_label }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="dashboard-search-shell">
+                        <div class="search" role="search" aria-label="Search weather by city">
+                            <input type="text" placeholder="Search for a city" aria-label="Search for a city">
+                            <button type="button" aria-label="Search city weather"><img src="{% static 'images/search.png' %}" alt=""></button>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        {% if weather_mode == "home" %}
+            <section class="mode-hint panel-card">
+                <p class="mode-hint-text">
+                    Need weather for another place? Open <a href="{% url 'find_weather' %}">Find Weather</a> and search any city.
+                </p>
+            </section>
+        {% endif %}
+
+        <section class="weather panel-card">
+            <div class="weather-left">
+                <div class="weather-icon-shell">
+                    <img src="" class="weather-icon" alt="Current weather icon">
+                </div>
+                <p class="weather-kicker">Current conditions</p>
+                <h1 class="temp"></h1>
+                <div class="weather-meta">
                     <h2 class="city"></h2>
-                </div>
-                <div class="weather-right">
-                    <div class="max">
-                            <p >Max-Tempreature</p>
-                            <p class="max-temp"></p>
-                    </div>
-                    <div class="min">
-                            <p >Min-Tempreature</p>
-                            <p class="min-temp"></p>
-                    </div>
-                    <div class="feels">
-                            <p >Feels like</p>
-                            <p class="feel-temp"></p>
-                    </div>
+                    <p class="weather-status"></p>
                 </div>
             </div>
+
+            <div class="weather-divider"></div>
+
+            <div class="weather-right">
+                <div class="max stat-card">
+                    <p class="label-text">Max Temp</p>
+                    <p class="max-temp value-text"></p>
+                </div>
+                <div class="min stat-card">
+                    <p class="label-text">Min Temp</p>
+                    <p class="min-temp value-text"></p>
+                </div>
+                <div class="feels stat-card">
+                    <p class="label-text">Feels Like</p>
+                    <p class="feel-temp value-text"></p>
+                </div>
+            </div>
+
+            <div class="weather-divider"></div>
+
             <div class="details">
-                <div class="col">
-                    <img src="{% static '/images/humidity.svg' %}" class="details-img">
-                        <p class="details-text">humidity</p>
-                        <p class="humdity" class="details-text"></p>
+                <div class="col detail-card">
+                    <p class="details-text label-text">Humidity</p>
+                    <p class="humdity value-text"></p>
                 </div>
-                <div class="col">
-                    <img src="{% static '/images/wind.svg' %}" class="details-img">
-                        <p class="details-text">wind speed</p>
-                        <p class="wind" class="details-text"></p>
+                <div class="col detail-card">
+                    <p class="details-text label-text">Wind Speed</p>
+                    <p class="wind value-text"></p>
                 </div>
-                <div class="col">
-                    <img src="{% static '/images/pressure.svg' %}" class="details-img">
-                        <p class="details-text">pressure</p>
-                        <p class="pressure" class="details-text"></p>
+                <div class="col detail-card">
+                    <p class="details-text label-text">Pressure</p>
+                    <p class="pressure value-text"></p>
                 </div>
             </div>
-        </div>
-        <div class="hourly-weather">
-            <span class="hourly-text">HOURLY WEATHER</span>
+        </section>
+
+        <section class="hourly-weather panel-card">
+            <div class="section-heading">
+                <div>
+                    <p class="section-kicker">Next 24 hours</p>
+                    <span class="hourly-text">Hourly forecast</span>
+                </div>
+            </div>
             <div id="container">
                 <div id="slider-container">
-                    <span onclick="slideRight()" class="btn"></span>
                     <div id="slider">
                         <div class="slide" id="silde0">
                             <h2 class="silde-time"></h2>
-                            <img src="" class="silde-img">
+                            <img src="" class="silde-img" alt="">
                             <h2 class="silde-temp"></h2>
                             <h2 class="silde-rainfall"></h2>
                         </div>
                         <div class="slide" id="silde1">
                             <h2 class="silde-time"></h2>
-                            <img src="" class="silde-img">
+                            <img src="" class="silde-img" alt="">
                             <h2 class="silde-temp"></h2>
                             <h2 class="silde-rainfall"></h2>
                         </div>
                         <div class="slide" id="silde2">
                             <h2 class="silde-time"></h2>
-                            <img src="" class="silde-img">
+                            <img src="" class="silde-img" alt="">
                             <h2 class="silde-temp"></h2>
                             <h2 class="silde-rainfall"></h2>
                         </div>
                         <div class="slide" id="silde3">
                             <h2 class="silde-time"></h2>
-                            <img src="" class="silde-img">
+                            <img src="" class="silde-img" alt="">
                             <h2 class="silde-temp"></h2>
                             <h2 class="silde-rainfall"></h2>
                         </div>
                         <div class="slide" id="silde4">
                             <h2 class="silde-time"></h2>
-                            <img src="" class="silde-img">
+                            <img src="" class="silde-img" alt="">
                             <h2 class="silde-temp"></h2>
                             <h2 class="silde-rainfall"></h2>
                         </div>
                         <div class="slide" id="silde5">
                             <h2 class="silde-time"></h2>
-                            <img src="" class="silde-img">
+                            <img src="" class="silde-img" alt="">
                             <h2 class="silde-temp"></h2>
                             <h2 class="silde-rainfall"></h2>
                         </div>
                         <div class="slide" id="silde6">
                             <h2 class="silde-time"></h2>
-                            <img src="" class="silde-img">
+                            <img src="" class="silde-img" alt="">
                             <h2 class="silde-temp"></h2>
                             <h2 class="silde-rainfall"></h2>
                         </div>
                         <div class="slide" id="silde7">
                             <h2 class="silde-time"></h2>
-                            <img src="" class="silde-img">
+                            <img src="" class="silde-img" alt="">
                             <h2 class="silde-temp"></h2>
                             <h2 class="silde-rainfall"></h2>
                         </div>
                     </div>
-                    <span onclick="slideLeft()" class="btn"></span>
                 </div>
             </div>
-        </div>
-        <div class="five-days">
-            <span id="five-day-text">FIVE-DAY FORECAST</span>
+        </section>
+
+        <section class="five-days panel-card">
+            <div class="section-heading">
+                <div>
+                    <p class="section-kicker">Weekly outlook</p>
+                    <span id="five-day-text">Five-day forecast</span>
+                </div>
+            </div>
             <ul>
                 <li>
                     <div class="left-content">
-                        <img src="" class="fiveday-img" id="imgday0">
+                        <img src="" class="fiveday-img" id="imgday0" alt="">
                         <h3 class="space-left" id="day0"></h3>
                         <h3 class="space-left" id="status0"></h3>
                     </div>
@@ -126,7 +202,7 @@
                 </li>
                 <li>
                     <div class="left-content">
-                        <img src="" class="fiveday-img" id="imgday1">
+                        <img src="" class="fiveday-img" id="imgday1" alt="">
                         <h3 class="space-left" id="day1"></h3>
                         <h3 class="space-left" id="status1"></h3>
                     </div>
@@ -138,7 +214,7 @@
                 </li>
                 <li>
                     <div class="left-content">
-                        <img src="" class="fiveday-img" id="imgday2">
+                        <img src="" class="fiveday-img" id="imgday2" alt="">
                         <h3 class="space-left" id="day2"></h3>
                         <h3 class="space-left" id="status2"></h3>
                     </div>
@@ -150,7 +226,7 @@
                 </li>
                 <li>
                     <div class="left-content">
-                        <img src="" class="fiveday-img" id="imgday3">
+                        <img src="" class="fiveday-img" id="imgday3" alt="">
                         <h3 class="space-left" id="day3"></h3>
                         <h3 class="space-left" id="status3"></h3>
                     </div>
@@ -162,7 +238,7 @@
                 </li>
                 <li>
                     <div class="left-content">
-                        <img src="" class="fiveday-img" id="imgday4">
+                        <img src="" class="fiveday-img" id="imgday4" alt="">
                         <h3 class="space-left" id="day4"></h3>
                         <h3 class="space-left" id="status4"></h3>
                     </div>
@@ -173,15 +249,22 @@
                     </div>
                 </li>
             </ul>
-        </div>
+        </section>
     </div>
-    <script src="{% static "js/script.js" %}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
     <script>
+        window.weatherConfig = {
+            mode: "{{ weather_mode }}",
+            findWeatherUrl: "{% url 'find_weather' %}",
+            savedHomeLabel: "{{ saved_home_label|default:''|escapejs }}",
+            savedHomeQuery: "{{ saved_home_query|default:''|escapejs }}"
+        };
         var staticCloudsUrl = "{% static 'images/clouds.png' %}";
-        var staticRainUrl = "{% static 'images/rain.png' %}"
-        var staticClearUrl = "{% static 'images/clear.png' %}"
-        var staticMistUrl = "{% static 'images/mist.png' %}"
-        var staticDrizzleUrl = "{% static 'images/drizzle.png' %}"
+        var staticRainUrl = "{% static 'images/rain.png' %}";
+        var staticClearUrl = "{% static 'images/clear.png' %}";
+        var staticMistUrl = "{% static 'images/mist.png' %}";
+        var staticDrizzleUrl = "{% static 'images/drizzle.png' %}";
+        var staticSnowUrl = "{% static 'images/snow.png' %}";
     </script>
+    <script src="{% static 'js/script.js' %}?v=1.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
 {% endblock  %}

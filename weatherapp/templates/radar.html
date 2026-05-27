@@ -1,33 +1,122 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Map</title>
+{% extends "base.html" %}
+{% load static %}
+
+{% block css_link %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
-        #map {
-            height: 100vh;
+        .radar-wrapper {
             width: 100%;
+            padding: 40px 35px;
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .radar-header {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .radar-title {
+            font-size: 38px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+
+        .radar-glass-container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 28px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            position: relative;
+        }
+        
+        #map {
+            height: 70vh;
+            width: 100%;
+            border-radius: 18px;
+            z-index: 1; /* Ensure map is below navbar */
+        }
+        
+        .layer-select {
+            background: rgba(12, 12, 38, 0.8);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 30px;
+            outline: none;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .layer-select:focus, .layer-select:hover {
+            border-color: rgba(0, 212, 255, 0.55);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+        }
+        
+        .layer-select option {
+            background: #0c0c26;
+            color: #fff;
+        }
+
+        @media only screen and (max-width: 768px) {
+            .radar-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .radar-title {
+                font-size: 28px;
+            }
+            #map {
+                height: 60vh;
+            }
+            .radar-wrapper {
+                padding: 20px 15px;
+            }
         }
     </style>
-</head>
-<body>
-    <div class="radar-option">
-        <select name="weather_map_layer" id="map_layer" onchange="getSelectedValue()">
-            <option value="temp_new">Temperature</option>
-            <option value="precipitation_new">precipitation</option>
-            <option value="pressure_new">Sea level pressure</option>
-            <option value="wind_new">Wind speed</option>
-            <option value="clouds_new">Clouds</option>
-        </select>
-    
+{% endblock %}
+
+{% block main_body %}
+    <div class="radar-wrapper">
+        <div class="radar-header">
+            <h2 class="radar-title">Live Weather Radar</h2>
+            <div class="radar-option">
+                <select name="weather_map_layer" id="map_layer" class="layer-select" onchange="getSelectedValue()">
+                    <option value="temp_new">Temperature</option>
+                    <option value="precipitation_new">Precipitation</option>
+                    <option value="pressure_new">Sea Level Pressure</option>
+                    <option value="wind_new">Wind Speed</option>
+                    <option value="clouds_new">Clouds</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="radar-glass-container">
+            <div id="map"></div>
+        </div>
     </div>
-    <div id="map"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        // Your OpenWeatherMap API key
-        const apiKey = '08e1d68746a3ed8abfd71233a74b98c7';
+        
 
         // Initialize the map
         const map = L.map('map').setView([20, 0], 2);
@@ -42,29 +131,37 @@
             map.panInsideBounds(bounds, { animate: false });
         });
 
-        // Add OpenStreetMap base layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        // Use CartoDB Dark Matter base layer for a matching aesthetic
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
         }).addTo(map);
-        L.tileLayer(`https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${apiKey}`, {
+
+        let currentLayer = L.tileLayer(`/radar/tiles/temp_new/{z}/{x}/{y}/`, {
             attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
-            minZoom: 1,  // Set minimum zoom level
-            maxZoom: 10  // Set maximum zoom level
+            minZoom: 1,  
+            maxZoom: 10  
         }).addTo(map);
+
         function getSelectedValue() {
             var selectElement = document.getElementById("map_layer");
             var selectedValue = selectElement.value;
-            // Add OpenWeatherMap tile layer
-            L.tileLayer(`https://tile.openweathermap.org/map/${selectedValue}/{z}/{x}/{y}.png?appid=${apiKey}`, {
+            
+            if (currentLayer) {
+                map.removeLayer(currentLayer);
+            }
+
+            // Add new OpenWeatherMap tile layer
+            currentLayer = L.tileLayer(`/radar/tiles/${selectedValue}/{z}/{x}/{y}/`, {
                 attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
-                minZoom: 1,  // Set minimum zoom level
-                maxZoom: 10  // Set maximum zoom level
+                minZoom: 1,  
+                maxZoom: 10  
             }).addTo(map);
         }
+        
         // Restrict map's zoom levels to match available OpenWeatherMap tiles
         map.setMinZoom(3);
         map.setMaxZoom(10);
     </script>
-</body>
-</html>
+{% endblock %}

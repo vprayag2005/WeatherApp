@@ -1,36 +1,35 @@
-window.onload = function() {
-    fetch('/news/newskerala/') // Adjust the URL to match your URL pattern
+window.onload = function () {
+    fetch('/news/newskerala/')
     .then(response => {
-        if (response.ok) {
-            return response.json(); // Parse JSON if the response is OK
-        }
+        if (response.ok) return response.json();
         throw new Error('Network response was not ok.');
     })
     .then(data => {
-        console.log(data);// Process the JSON data
-       
-        const cardContainer = document.querySelector('.row.row-cols-1.row-cols-md-3.g-4');
-        for (let index = 0; index < data.images_link.length; index++) {
-            const card =document.createElement('div')
-            card.className=('col')
+        
+        const cardContainer = document.getElementById('newscard');
+        const total = data.headlines.length;
+        for (let index = 0; index < total; index++) {
+            const headline = data.headlines[index].headline;
+            const link     = data.news_links[index].news_link;
+            const source   = data.sources ? data.sources[index].source : '';
+            const pubDate  = data.pubDates ? data.pubDates[index].pubDate : '';
+            const card = document.createElement('div');
+            card.className = 'col';
             card.innerHTML = `
-                <a href="${data.news_link[index].news_link}">
+                <a href="${link}" target="_blank" style="text-decoration:none;">
                     <div class="card h-100">
-                    <img src=" ${data.images_link[index].img_link}" class="card-img-top" alt="...">
-                    <div class="card-body">
-                        <h5 class="card-title">${data.headlines[index].headline}</h5>
-                    </div>
-                    <div class="card-footer">
-                        <small class="text-muted">Last updated 3 mins ago</small>
-                    </div>
+                        <div class="card-body">
+                            <h5 class="card-title">${headline}</h5>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between align-items-center">
+                            <small class="text-muted">${source}</small>
+                            <small class="text-muted">${pubDate}</small>
+                        </div>
                     </div>
                 </a>
             `;
-            cardContainer.append(card)
-            
+            cardContainer.append(card);
         }
     })
     .catch(error => console.error('Error fetching data:', error));
-
-    
 };

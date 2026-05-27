@@ -1,56 +1,75 @@
-from django.shortcuts import render
 from django.http import JsonResponse
-from newsapp.models import GlobalNews,NationalNews,KeralaNews,KarnatakaNews
+from django.shortcuts import redirect, render
 
-def nationalnews(request):
-    return render(request,'national_news.html')
-def news_national(request):
-    headlines=list(NationalNews.objects.values('headline'))
-    images_link=list(NationalNews.objects.values('img_link'))
-    news_link=list(NationalNews.objects.values('news_link'))
-    data = {
-        'headlines':headlines,
-        'images_link': images_link,
-        'news_link': news_link,
-    }
-    return JsonResponse(data)
+from home.utils import display_state_name, normalize_state_key, state_slug
+from newsapp.models import GlobalNews, NationalNews, StateNews
+from newsapp.scrapper import scrape_news
+
+
+# ---------------------------------------------------------------------------
+# Page views
+# ---------------------------------------------------------------------------
 
 def globalnews(request):
-    return render(request,'global_news.html')
+    return render(request, 'global_news.html')
+
+
+def nationalnews(request):
+    return render(request, 'national_news.html')
+
+
+def my_state_news(request):
+    return redirect("state_news", state_name=state_slug(request.user_settings.state))
+
+
+def state_news(request, state_name):
+    normalized_state = normalize_state_key(state_name)
+    return render(
+        request,
+        "state_news.html",
+        {
+            "state_label": display_state_name(normalized_state),
+            "state_name": state_slug(normalized_state),
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# JSON API views  (used by frontend to fetch news data)
+# ---------------------------------------------------------------------------
+
 def news_global(request):
-    headlines=list(GlobalNews.objects.values('headline'))
-    images_link=list(GlobalNews.objects.values('img_link'))
-    news_link=list(GlobalNews.objects.values('news_link'))
     data = {
-        'headlines':headlines,
-        'images_link': images_link,
-        'news_link': news_link,
+        'headlines':  list(GlobalNews.objects.values('headline')),
+        'news_links': list(GlobalNews.objects.values('news_link')),
+        'pubDates':   list(GlobalNews.objects.values('pubDate')),
+        'sources':    list(GlobalNews.objects.values('source')),
     }
     return JsonResponse(data)
-def keralanews(request):
-    return render(request,'kerala_news.html')
-def news_kerala(request):
-    headlines=list(KeralaNews.objects.values('headline'))
-    images_link=list(KeralaNews.objects.values('img_link'))
-    news_link=list(KeralaNews.objects.values('news_link'))
+
+
+def news_national(request):
     data = {
-        'headlines':headlines,
-        'images_link': images_link,
-        'news_link': news_link,
+        'headlines':  list(NationalNews.objects.values('headline')),
+        'news_links': list(NationalNews.objects.values('news_link')),
+        'pubDates':   list(NationalNews.objects.values('pubDate')),
+        'sources':    list(NationalNews.objects.values('source')),
     }
     return JsonResponse(data)
-def karnatakanews(requests):
-    return render(requests,"karnataka_news.html")
-def news_karnataka(request):
-    headlines=list(KarnatakaNews.objects.values('headline'))
-    news_link=list(KarnatakaNews.objects.values('news_link'))
-    pubdates=list(KarnatakaNews.objects.values('pubDate'))
-    sources=list(KarnatakaNews.objects.values('source'))
+
+
+def news_state(request, state_name):
+    normalized_state = normalize_state_key(state_name)
+    news_qs = StateNews.objects.filter(state_name__iexact=normalized_state)
+
+    if not news_qs.exists():
+        scrape_news(normalized_state)
+        news_qs = StateNews.objects.filter(state_name__iexact=normalized_state)
+
     data = {
-        'headlines':headlines,
-        'news_links': news_link,
-        'pubDates': pubdates,
-        'Sources': sources,
-        
+        'headlines':  list(news_qs.values('headline')),
+        'news_links': list(news_qs.values('news_link')),
+        'pubDates':   list(news_qs.values('pubDate')),
+        'sources':    list(news_qs.values('source')),
     }
     return JsonResponse(data)

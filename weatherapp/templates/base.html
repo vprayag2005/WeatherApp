@@ -30,16 +30,16 @@
                   News
                 </a>
                 <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="{% url 'global_news' %}">Global News</a></li>
-                  <li><a class="dropdown-item" href="{% url "national_news" %}">National news</a></li>
-                  <li><a class="dropdown-item" href="{% url "kerala_news" %}" id="statenews_link">Regional News</a></li>
+                  <li><a class="dropdown-item" href="{% if user_settings %}{% url 'global_news' %}{% else %}{% url 'settings' %}{% endif %}">Global News</a></li>
+                  <li><a class="dropdown-item" href="{% if user_settings %}{% url 'national_news' %}{% else %}{% url 'settings' %}{% endif %}">National news</a></li>
+                  <li><a class="dropdown-item" href="{% if user_settings %}{% url 'my_state_news' %}{% else %}{% url 'settings' %}{% endif %}" id="statenews_link">Regional News</a></li>
                 </ul>
               </li>
               <li class="nav-item ps-3">
-                <a class="nav-link text-white" href="{% url "radar" %}">Radar</a>
+                <a class="nav-link text-white" href="{% if user_settings %}{% url 'radar' %}{% else %}{% url 'settings' %}{% endif %}">Radar</a>
               </li>
               <li class="nav-item ps-3">
-                <a class="nav-link text-white" href="{% url "settings" %}">Settings</a>
+                <a class="nav-link text-white" href="{% url 'settings' %}">{% if user_settings %}Settings{% else %}Get Started{% endif %}</a>
               </li>
             </ul>
           </div>

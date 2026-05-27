@@ -1,222 +1,282 @@
 const searchbox = document.querySelector(".search input")
 const searchbtn = document.querySelector(".search button")
-const weather_icon = document.querySelector(".weather-icon")
-async function weathercheck(city) {
-	const formData = new FormData();
-	formData.append('city', city);
-	try {
-		const response = await fetch('/fetch-data/', {
-			method: 'POST',
-			headers: {
-				'X-CSRFToken': getCookie('csrftoken') // Ensure CSRF token is sent
-			},
-			body: formData
-		});
-		const weather_data = await response.json();
-		const data =weather_data[0]
-		const data_hourly =weather_data[1]
-		console.log('Data received from Django:', data,data_hourly);
-		document.querySelector(".city").innerHTML = data.name
-		document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + " °C"
-		document.querySelector(".humdity").innerHTML = data.main.humidity + " %"
-		document.querySelector(".wind").innerHTML = data.wind.speed + " km/h"
-		document.querySelector(".pressure").innerHTML = data.main.pressure + " Pa"
-		document.querySelector(".max-temp").innerHTML = Math.round(data.main.temp_max) + " °C"
-		document.querySelector(".min-temp").innerHTML = Math.round(data.main.temp_min) + " °C"
-		document.querySelector(".feel-temp").innerHTML = Math.round(data.main.feels_like) + " °C"
-		if (data.weather[0].main == "Clouds") {
-			weather_icon.src = staticCloudsUrl
-		} else if (data.weather[0].main == "Clear") {
-			weather_icon.src = staticClearUrl
-		} else if (data.weather[0].main == "Rain") {
-			weather_icon.src = staticRainUrl
-		} else if (data.weather[0].main == "Drizzle.png") {
-			weather_icon.src = staticDrizzleUrl
-		} else if (data.weather[0].main == "Mist") {
-			weather_icon.src = staticMistUrl
+const weatherIcon = document.querySelector(".weather-icon")
+const weatherStatus = document.querySelector(".weather-status")
+const locationStatus = document.getElementById("location-status")
+const useLocationButton = document.getElementById("use-location-button")
+const degreeUnit = "\u00B0C"
+const pageMode = window.weatherConfig?.mode || document.body.dataset.weatherMode || "search"
+const savedHomeLabel = window.weatherConfig?.savedHomeLabel || ""
+const savedHomeQuery = window.weatherConfig?.savedHomeQuery || ""
+
+function getWeatherIcon(condition) {
+	const map = {
+		Clouds: staticCloudsUrl,
+		Clear: staticClearUrl,
+		Rain: staticRainUrl,
+		Drizzle: staticDrizzleUrl,
+		Mist: staticMistUrl,
+		Snow: typeof staticSnowUrl !== "undefined" ? staticSnowUrl : "",
+	}
+	return map[condition] || ""
+}
+
+function formatWeatherLabel(value) {
+	return value ? value.replace(/\b\w/g, char => char.toUpperCase()) : ""
+}
+
+function setText(selector, value) {
+	const element = document.querySelector(selector)
+	if (element) {
+		element.innerHTML = value
+	}
+}
+
+function setLocationStatus(message) {
+	if (locationStatus) {
+		locationStatus.textContent = message
+	}
+}
+
+function getCookie(name) {
+	if (!document.cookie) {
+		return null
+	}
+	const match = document.cookie
+		.split(";")
+		.map(cookie => cookie.trim())
+		.find(cookie => cookie.startsWith(name + "="))
+	return match ? decodeURIComponent(match.split("=")[1]) : null
+}
+
+async function fetchWeather(payload) {
+	const formData = new FormData()
+	Object.entries(payload).forEach(([key, value]) => {
+		if (value !== undefined && value !== null && value !== "") {
+			formData.append(key, value)
 		}
-		for (let index = 0; index < 8; index++) {
-			document.querySelector(`#silde${index} .silde-time`).innerHTML = data_hourly.list[index].dt_txt.split(' ')[1]
-			const hourly_icon = document.querySelector(`#silde${index} .silde-img`)
-			if (data_hourly.list[index].weather[0].main == "Clouds") {
-				hourly_icon.src = staticCloudsUrl
-			} else if (data_hourly.list[index].weather[0].main == "Clear") {
-				hourly_icon.src = staticClearUrl
-			} else if (data_hourly.list[index].weather[0].main == "Rain") {
-				hourly_icon.src = staticRainUrl
-			} else if (data_hourly.list[index].weather[0].main == "Drizzle.png") {
-				hourly_icon.src = staticDrizzleUrl
-			} else if (data_hourly.list[index].weather[0].main == "Mist") {
-				hourly_icon.src = staticMistUrl
-			}
-			document.querySelector(`#silde${index} .silde-temp`).innerHTML = Math.round(data_hourly.list[index].main.temp) + " °C"
-			if (data_hourly.list[index].rain) {
-				document.querySelector(`#silde${index} .silde-rainfall`).innerHTML = data_hourly.list[index].rain["3h"] + "mm"
-			}
+	})
+
+	const response = await fetch("/fetch-data/", {
+		method: "POST",
+		headers: { "X-CSRFToken": getCookie("csrftoken") },
+		body: formData,
+	})
+	const weatherData = await response.json()
+
+	if (!response.ok || weatherData.error) {
+		throw new Error(weatherData.error || "Failed to fetch weather data")
+	}
+
+	return weatherData
+}
+
+function renderCurrentWeather(data) {
+	const currentCondition = formatWeatherLabel(
+		data.weather?.[0]?.description || data.weather?.[0]?.main || ""
+	)
+	const windSpeed = data.wind?.speed ? Math.round(data.wind.speed * 3.6) : 0
+
+	setText(".city", data.name)
+	setText(".temp", `${Math.round(data.main.temp)} ${degreeUnit}`)
+	setText(".humdity", `${data.main.humidity} %`)
+	setText(".wind", `${windSpeed} km/h`)
+	setText(".pressure", `${data.main.pressure} hPa`)
+	setText(".max-temp", `${Math.round(data.main.temp_max)} ${degreeUnit}`)
+	setText(".min-temp", `${Math.round(data.main.temp_min)} ${degreeUnit}`)
+	setText(".feel-temp", `${Math.round(data.main.feels_like)} ${degreeUnit}`)
+
+	if (weatherStatus) {
+		weatherStatus.innerHTML = currentCondition
+	}
+
+	if (weatherIcon) {
+		weatherIcon.src = getWeatherIcon(data.weather?.[0]?.main)
+		weatherIcon.alt = currentCondition ? `${currentCondition} icon` : "Current weather icon"
+	}
+}
+
+function renderHourlyForecast(hourlyData) {
+	for (let i = 0; i < 8; i++) {
+		const entry = hourlyData.list[i]
+		if (!entry) {
+			continue
 		}
-		document.querySelector(".left-content #day0").innerHTML = "Tomorrow"
-		let i = 0
-		let flag = 1
-		const now = new Date()
-		let day_index = now.getDay() + 2
-		for (let index = 0; index < 5; index++) {
-			let dict = {}
-			let min_day_temp=0
-			let max_day_temp=0
-			let count=0
-			let max_count = 0
-			let common = ""
-			const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-			if (day_index > 6) {
-				day_index = 0
-			}
-			if (document.querySelector(`.left-content #day${index + 1}`)) {
-				document.querySelector(`.left-content #day${index + 1}`).innerHTML = (daysOfWeek[day_index])
-				day_index++
-			}
-			const year = now.getFullYear();
-			var month = String(now.getMonth() + 1).padStart(2, '0');
-			var day = String(now.getDate()).padStart(2, '0');
-			var formattedDate = `${year}-${month}-${String(parseInt(day, 10) + 1 + index).padStart(2, '0')}`
-			console.log(formattedDate)
-			for (i; i < 40; i++) {
-				if (data_hourly.list[i].dt_txt.split(' ')[0] == formattedDate) {
-					flag = 0
-					var value = data_hourly.list[i].weather[0].main
-					min_day_temp+=data_hourly.list[i].main.temp_min
-					max_day_temp+=data_hourly.list[i].main.temp_max
-					count++
-					if (value in dict) {
-						dict[value] += 1
-					} else {
-						dict[value] = 1
-					}
-					if (dict[value] > max_count) {
-						max_count = dict[value]
-						common = value
-					}
-				} else {
-					if (flag == 0) {
-						break
-					}
+
+		const slideIcon = document.querySelector(`#silde${i} .silde-img`)
+		setText(`#silde${i} .silde-time`, entry.dt_txt.split(" ")[1])
+		if (slideIcon) {
+			slideIcon.src = getWeatherIcon(entry.weather?.[0]?.main)
+			slideIcon.alt = formatWeatherLabel(entry.weather?.[0]?.main || "")
+		}
+		setText(`#silde${i} .silde-temp`, `${Math.round(entry.main.temp)} ${degreeUnit}`)
+		setText(`#silde${i} .silde-rainfall`, entry.rain ? `${entry.rain["3h"]} mm` : "")
+	}
+}
+
+function renderFiveDayForecast(hourlyData) {
+	setText(".left-content #day0", "Tomorrow")
+	const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+	const now = new Date()
+	let dayIndex = now.getDay() + 2
+	let hourlyIndex = 0
+
+	for (let index = 0; index < 5; index++) {
+		if (dayIndex > 6) {
+			dayIndex = 0
+		}
+		if (document.querySelector(`.left-content #day${index + 1}`)) {
+			setText(`.left-content #day${index + 1}`, daysOfWeek[dayIndex])
+			dayIndex += 1
+		}
+
+		const forecastDate = new Date(now)
+		forecastDate.setDate(now.getDate() + index + 1)
+		const formattedDate = forecastDate.toISOString().split("T")[0]
+
+		const weatherCounts = {}
+		let minDayTemp = 0
+		let maxDayTemp = 0
+		let count = 0
+		let maxCount = 0
+		let common = ""
+		let foundDate = false
+
+		for (; hourlyIndex < hourlyData.list.length; hourlyIndex++) {
+			const currentEntry = hourlyData.list[hourlyIndex]
+			if (currentEntry.dt_txt.split(" ")[0] === formattedDate) {
+				foundDate = true
+				const value = currentEntry.weather?.[0]?.main || ""
+				minDayTemp += currentEntry.main.temp_min
+				maxDayTemp += currentEntry.main.temp_max
+				count += 1
+				weatherCounts[value] = (weatherCounts[value] || 0) + 1
+				if (weatherCounts[value] > maxCount) {
+					maxCount = weatherCounts[value]
+					common = value
 				}
+			} else if (foundDate) {
+				break
 			}
-			document.querySelector(`.left-content #status${index}`).innerHTML = common
-			const day_icon = document.querySelector(`#imgday${index}`)
-			if (common == "Clouds") {
-				day_icon.src = staticCloudsUrl
-			} else if (common == "Clear") {
-				day_icon.src = staticClearUrl
-			} else if (common == "Rain") {
-				day_icon.src = staticRainUrl
-			} else if (common == "Drizzle.png") {
-				day_icon.src = staticDrizzleUrl
-			} else if (common == "Mist") {
-				day_icon.src = staticMistUrl
-			}
-			document.querySelector(`#max_temp${index}`).innerHTML = Math.round(max_day_temp/count)+" °C"
-			document.querySelector(`#min_temp${index}`).innerHTML = Math.round(min_day_temp/count)+" °C"	
 		}
+
+		setText(`.left-content #status${index}`, formatWeatherLabel(common))
+		const forecastIcon = document.querySelector(`#imgday${index}`)
+		if (forecastIcon) {
+			forecastIcon.src = getWeatherIcon(common)
+			forecastIcon.alt = common ? `${formatWeatherLabel(common)} icon` : ""
+		}
+
+		if (count > 0) {
+			setText(`#max_temp${index}`, `${Math.round(maxDayTemp / count)} ${degreeUnit}`)
+			setText(`#min_temp${index}`, `${Math.round(minDayTemp / count)} ${degreeUnit}`)
+		} else {
+			setText(`#max_temp${index}`, `-- ${degreeUnit}`)
+			setText(`#min_temp${index}`, `-- ${degreeUnit}`)
+		}
+	}
+}
+
+async function weathercheck(payload, options = {}) {
+	try {
+		const weatherData = await fetchWeather(payload)
+		const currentWeather = weatherData[0]
+		const forecastData = weatherData[1]
+
+		renderCurrentWeather(currentWeather)
+		renderHourlyForecast(forecastData)
+		renderFiveDayForecast(forecastData)
+
+		const defaultSuccessMessage =
+			pageMode === "home"
+				? "Showing live weather for your current location."
+				: `Showing weather for ${currentWeather.name}.`
+
+		setLocationStatus(options.successMessage || defaultSuccessMessage)
 	} catch (error) {
-		console.error('Error:', error);
+		console.error("Error:", error)
+		setLocationStatus(error.message)
+		if (pageMode !== "home") {
+			console.error(`Error: ${error.message}`)
+		}
 	}
 }
 
-searchbtn.addEventListener("click", () => {
-	if (searchbox.value) {
-		console.log(searchbox.value+"hshakfjwhfish")
-		weathercheck(searchbox.value)
-		searchbox.value=""
+function searchWeather() {
+	if (!searchbox) {
+		return
 	}
-})
-
-var container = document.getElementById('container')
-var slider = document.getElementById('slider');
-var slides = document.getElementsByClassName('slide').length;
-var buttons = document.getElementsByClassName('btn');
-
-var currentPosition = 0;
-var currentMargin = 0;
-var slidesPerPage = 0;
-var slidesCount = slides - slidesPerPage;
-var containerWidth = container.offsetWidth;
-var prevKeyActive = false;
-var nextKeyActive = true;
-
-window.addEventListener("resize", checkWidth);
-
-function checkWidth() {
-	containerWidth = container.offsetWidth;
-	setParams(containerWidth);
+	const city = searchbox.value.trim()
+	if (!city) {
+		return
+	}
+	setLocationStatus(`Searching weather for ${city}...`)
+	weathercheck({ city })
+	searchbox.value = ""
 }
 
-function setParams(w) {
-	console.log(w)
-	if (w < 600) {
-		slidesPerPage = 1;
-	}else if(w<768){
-		slidesPerPage = 2
-	}else{
-		slidesPerPage=5
+function loadSavedHomeWeather(reasonMessage) {
+	if (!savedHomeQuery) {
+		return false
 	}
-	slidesCount = slides - slidesPerPage;
-	if (currentPosition > slidesCount) {
-		currentPosition -= slidesPerPage;
-	};
-	currentMargin = - currentPosition * (100 / slidesPerPage);
-	slider.style.marginLeft = currentMargin + '%';
-	if (currentPosition > 0) {
-		buttons[0].classList.remove('inactive');
-	}
-	if (currentPosition < slidesCount) {
-		buttons[1].classList.remove('inactive');
-	}
-	if (currentPosition >= slidesCount) {
-		buttons[1].classList.add('inactive');
-	}
+
+	setLocationStatus(reasonMessage || `Loading saved home weather for ${savedHomeLabel}...`)
+	weathercheck(
+		{ city: savedHomeQuery },
+		{ successMessage: `Showing saved home weather for ${savedHomeLabel}.` }
+	)
+	return true
 }
 
-setParams();
+function loadCurrentLocationWeather() {
+	if (!navigator.geolocation) {
+		if (!loadSavedHomeWeather("Location access is not available in this browser. Loading saved home weather instead...")) {
+			setLocationStatus(
+				"Location access is not available in this browser. Use Find Weather to search manually."
+			)
+		}
+		return
+	}
 
-function slideRight() {
-	if (currentPosition != 0) {
-		slider.style.marginLeft = currentMargin + (100 / slidesPerPage) + '%';
-		currentMargin += (100 / slidesPerPage);
-		currentPosition--;
-	};
-	if (currentPosition === 0) {
-		buttons[0].classList.add('inactive');
-	}
-	if (currentPosition < slidesCount) {
-		buttons[1].classList.remove('inactive');
-	}
-};
+	setLocationStatus("Getting your current location...")
+	navigator.geolocation.getCurrentPosition(
+		position => {
+			weathercheck({
+				lat: position.coords.latitude,
+				lon: position.coords.longitude,
+			})
+		},
+		() => {
+			if (!loadSavedHomeWeather("Location access was blocked. Loading saved home weather instead...")) {
+				setLocationStatus(
+					"Location access was blocked. Use Find Weather to search another city manually."
+				)
+			}
+		},
+		{
+			enableHighAccuracy: true,
+			timeout: 10000,
+			maximumAge: 300000,
+		}
+	)
+}
 
-function slideLeft() {
-	if (currentPosition != slidesCount) {
-		slider.style.marginLeft = currentMargin - (100 / slidesPerPage) + '%';
-		currentMargin -= (100 / slidesPerPage);
-		currentPosition++;
-	};
-	if (currentPosition == slidesCount) {
-		buttons[1].classList.add('inactive');
-	}
-	if (currentPosition > 0) {
-		buttons[0].classList.remove('inactive');
-	}
-};
-        // Function to get CSRF token from cookies
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
+if (searchbtn && searchbox) {
+	searchbtn.addEventListener("click", searchWeather)
+	searchbox.addEventListener("keydown", event => {
+		if (event.key === "Enter") {
+			event.preventDefault()
+			searchWeather()
+		}
+	})
+}
+
+if (useLocationButton) {
+	useLocationButton.addEventListener("click", loadCurrentLocationWeather)
+}
+
+if (pageMode === "home") {
+	loadCurrentLocationWeather()
+} else {
+	setLocationStatus("Search for any city to load weather details.")
+}

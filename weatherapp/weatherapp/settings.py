@@ -23,12 +23,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-75z&2@^dhr79%!ot=meo4naa8a6dl(+df&^93mujw@+8egj@f='
+import os
+from dotenv import load_dotenv
+load_dotenv(os.path.join(BASE_DIR.parent, '.env'))
+
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['192.168.100.27','127.0.0.1','localhost']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '192.168.100.27,127.0.0.1,localhost').split(',')
 
 
 # Application definition
@@ -48,12 +52,14 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'home.middleware.UserSettingsRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'weatherapp.urls'
@@ -83,11 +89,11 @@ WSGI_APPLICATION = 'weatherapp.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',  
-        'NAME': 'weatherapp',        
-        'USER': 'root',            
-        'PASSWORD': 'prayag1234',    
-        'HOST': 'localhost',                 
-        'PORT': '3306',                    
+        'NAME': os.getenv('DB_NAME'),        
+        'USER': os.getenv('DB_USER'),            
+        'PASSWORD': os.getenv('DB_PASSWORD'),    
+        'HOST': os.getenv('DB_HOST'),                 
+        'PORT': os.getenv('DB_PORT'),                    
     }
 }
 
@@ -130,6 +136,10 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR,'static'),
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -151,5 +161,45 @@ CELERY_BEAT_SCHEDULE = {
     'run-scraper-every-3-hours': {
         'task': 'newsapp.tasks.run_scraper_task',  # Replace with your actual task name
         'schedule': timedelta(minutes=2),  # Runs every 3 hours
+    },
+}
+
+
+SECURE_HSTS_SECONDS = 31536000 # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+X_FRAME_OPTIONS = 'DENY'
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost,http://127.0.0.1').split(',')
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": os.environ.get("REDIS_URL", "redis://localhost:6379/1"),
+    }
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
     },
 }
