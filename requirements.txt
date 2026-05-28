@@ -188,4 +188,6 @@ webencodings==0.5.1
 websocket-client==1.9.0
 Werkzeug==3.1.6
 zipp==3.23.0
-਍畧楮潣湲㴽㈲〮〮਍癵捩牯孮瑳湡慤摲㵝〽㈮⸹ര眊楨整潮獩㵥㘽㘮〮਍
+gunicorn==22.0.0
+uvicorn[standard]==0.29.0
+whitenoise==6.6.0
