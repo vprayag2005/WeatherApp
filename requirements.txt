@@ -162,7 +162,6 @@ sqlparse==0.5.5
 stack-data==0.6.3
 stevedore==5.8.0
 sympy==1.14.0
--e git+https://github.com/vprayag2005/custom-benchmark.git@a26decc0c85a73f815913100a76c3978dc410ddb#egg=sympy_benchmark
 tabulate==0.9.0
 tenacity==9.1.4
 terminado==0.18.1
