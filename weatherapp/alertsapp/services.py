@@ -446,16 +446,19 @@ def fetch_and_save_district_map_images(target_states=None):
                                 chartdiv.style.overflow = 'visible';
                             }
                         """)
-                        # Wait a little for the map to fully render if it didn't reload but dynamically updated
-                        page.wait_for_timeout(2000)
-                        
-                        # Remove SVG clipping just in case
+                        # Remove ALL clipping restrictions across the entire DOM so no wide states are cut off
                         page.evaluate("""
-                            document.querySelectorAll('svg').forEach(svg => {
-                                svg.style.overflow = 'visible';
+                            document.body.style.width = '3000px';
+                            document.body.style.height = '3000px';
+                            const els = document.querySelectorAll('*');
+                            els.forEach(el => {
+                                const style = window.getComputedStyle(el);
+                                if (style.overflow === 'hidden' || style.overflow === 'clip') {
+                                    el.style.overflow = 'visible';
+                                }
                             });
                         """)
-                        page.wait_for_timeout(500)
+                        page.wait_for_timeout(1000)
                         
                         # Smart crop using the SVG group element
                         svgelements = page.query_selector_all("svg")
