@@ -449,9 +449,34 @@ def fetch_and_save_district_map_images(target_states=None):
                         # Wait a little for the map to fully render if it didn't reload but dynamically updated
                         page.wait_for_timeout(2000)
                         
-                        # Take the screenshot of the maindiv to include legend and map
-                        maindiv = page.locator("#maindiv")
-                        screenshot_bytes = maindiv.screenshot()
+                        # Smart crop using the SVG group element
+                        svgelements = page.query_selector_all("svg")
+                        if len(svgelements) > 1:
+                            svg = svgelements[1]
+                        elif len(svgelements) == 1:
+                            svg = svgelements[0]
+                        else:
+                            raise Exception("No SVG found")
+
+                        svg_box = svg.bounding_box()
+                        svg_area = svg_box['width'] * svg_box['height']
+                        
+                        best_g = None
+                        best_area = 0
+                        
+                        for g in svg.query_selector_all("g"):
+                            box = g.bounding_box()
+                            if not box:
+                                continue
+                            area = box['width'] * box['height']
+                            if area > best_area and area < (svg_area * 0.95):
+                                best_area = area
+                                best_g = g
+                                
+                        if not best_g:
+                            raise Exception("Could not find suitable map group inside SVG")
+                            
+                        screenshot_bytes = best_g.screenshot()
 
                         os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
                         
@@ -460,19 +485,7 @@ def fetch_and_save_district_map_images(target_states=None):
                             day_number=day
                         )
                         
-                        if state_name in DISTRICT_CROP_CONFIGS:
-                            try:
-                                pil_image = Image.open(io.BytesIO(screenshot_bytes))
-                                x, y, w, h = DISTRICT_CROP_CONFIGS[state_name]
-                                cropped = pil_image.crop((x, y, x + w, y + h))
-                                output_io = io.BytesIO()
-                                cropped.save(output_io, format='PNG')
-                                final_bytes = output_io.getvalue()
-                            except Exception as e:
-                                logger.error(f"Error cropping image for {state_name}: {e}")
-                                final_bytes = screenshot_bytes
-                        else:
-                            final_bytes = screenshot_bytes
+                        final_bytes = screenshot_bytes
                             
                         image_name = f"district_alert_{state_name.replace(' ', '_')}_day_{day}.png"
                         obj.image.save(image_name, ContentFile(final_bytes), save=True)
