@@ -148,7 +148,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #CELERY SETTINGS
-CELERY_IMPORTS = ('newsapp.tasks',)
+CELERY_IMPORTS = ('newsapp.tasks', 'alertsapp.tasks',)
 # Celery configuration
 CELERY_BROKER_URL = 'redis://redis:6379/1'  # Redis as the broker
 CELERY_RESULT_BACKEND = 'redis://redis:6379/1'  # Use Redis to store results
@@ -163,6 +163,14 @@ CELERY_BEAT_SCHEDULE = {
     'run-scraper-every-3-hours': {
         'task': 'newsapp.tasks.run_scraper_task',  # Replace with your actual task name
         'schedule': timedelta(minutes=2),  # Runs every 3 hours
+    },
+    'sync-subdivision-alerts': {
+        'task': 'alertsapp.tasks.sync_subdivision_alerts_task',
+        'schedule': timedelta(hours=6),
+    },
+    'sync-district-alerts': {
+        'task': 'alertsapp.tasks.sync_district_alerts_task',
+        'schedule': timedelta(hours=6),
     },
 }
 

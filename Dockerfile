@@ -22,6 +22,9 @@ COPY requirements.txt /app/
 RUN pip install --upgrade pip \
     && pip install -r requirements.txt
 
+# Install Playwright browsers and dependencies
+RUN playwright install --with-deps chromium
+
 # Copy project
 COPY . /app/
 

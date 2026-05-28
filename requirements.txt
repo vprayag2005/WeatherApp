@@ -12,3 +12,4 @@ django-celery-results
 django-celery-beat
 lxml
 Pillow
+playwright
