@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'home',
     'newsapp',
+    'alertsapp',
     'django_celery_results',
     'django_celery_beat',
 ]
