@@ -394,7 +394,7 @@ def fetch_and_save_district_map_images(target_states=None):
         browser = p.chromium.launch(headless=True)
         # Taller and MASSIVE viewport for wide states like Arunachal Pradesh
         # This completely prevents AmCharts from dynamically clipping the SVG boundaries
-        page = browser.new_page(viewport={"width": 3500, "height": 2000})
+        page = browser.new_page(viewport={"width": 4000, "height": 4000})
         
         for state_name in states_to_process:
             url = DISTRICT_WISE_URLS.get(state_name)
@@ -408,18 +408,46 @@ def fetch_and_save_district_map_images(target_states=None):
                 page.wait_for_selector("#maindiv", state="visible", timeout=30000)
                 page.wait_for_selector("#chartdiv1", state="visible", timeout=30000)
                 
+                # Force AmCharts to use the entire massive 4000x4000 canvas
+                # This prevents it from falling back to a tiny 563px height which cuts off tall states like Karnataka
+                page.evaluate("""
+                    document.body.style.width = '4000px';
+                    document.body.style.height = '4000px';
+                    const maindiv = document.getElementById('maindiv');
+                    if (maindiv) {
+                        maindiv.style.setProperty('width', '3800px', 'important');
+                        maindiv.style.setProperty('height', '3800px', 'important');
+                    }
+                    const chartdiv = document.getElementById('chartdiv1');
+                    if (chartdiv) {
+                        chartdiv.style.setProperty('width', '3800px', 'important');
+                        chartdiv.style.setProperty('height', '3800px', 'important');
+                    }
+                    window.dispatchEvent(new Event('resize'));
+                """)
+                
                 page.wait_for_timeout(1000) # Give AmCharts a second to redraw
                 
                 for day in range(1, 6):
                     try:
                         radio_selector = f"input[type='radio'][value='Day_{day}']"
                         if page.locator(radio_selector).count() > 0:
-                            # It triggers a page reload, so we must wait for navigation
-                            with page.expect_navigation(wait_until="networkidle"):
-                                page.locator(radio_selector).click(force=True)
-                            page.wait_for_selector("#chartdiv1", state="visible", timeout=30000)
+                            page.locator(radio_selector).click(force=True)
+                            
+                        # Wait a little for the map to fully render
+                        page.wait_for_timeout(2000)
                         
-                        # Wait a little for the map to fully render if it didn't reload but dynamically updated
+                        # Re-apply CSS after click because DOM might have been rebuilt
+                        page.evaluate("""
+                            const chartdiv = document.getElementById('chartdiv1');
+                            if (chartdiv) {
+                                chartdiv.style.setProperty('width', '3800px', 'important');
+                                chartdiv.style.setProperty('height', '3800px', 'important');
+                            }
+                            window.dispatchEvent(new Event('resize'));
+                        """)
+                        
+                        # Give AmCharts time to respond to the resize event
                         page.wait_for_timeout(2000)
                         
                         # Smart crop using the SVG group element
