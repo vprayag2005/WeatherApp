@@ -383,8 +383,8 @@ def fetch_and_save_district_map_images(target_states=None):
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        # Taller viewport for more bottom space
-        page = browser.new_page(viewport={"width": 1200, "height": 1050})
+        # Taller viewport for more bottom space and wider for wide states
+        page = browser.new_page(viewport={"width": 1920, "height": 1200})
         
         for state_name in states_to_process:
             url = DISTRICT_WISE_URLS.get(state_name)
@@ -398,6 +398,22 @@ def fetch_and_save_district_map_images(target_states=None):
                 page.wait_for_selector("#maindiv", state="visible", timeout=30000)
                 page.wait_for_selector("#chartdiv1", state="visible", timeout=30000)
                 
+                # Force the container to be wide enough so states like Arunachal Pradesh are never cut off
+                page.evaluate("""
+                    document.body.style.width = '1920px';
+                    const maindiv = document.getElementById('maindiv');
+                    if (maindiv) {
+                        maindiv.style.width = '1800px';
+                        maindiv.style.overflow = 'visible';
+                    }
+                    const chartdiv = document.getElementById('chartdiv1');
+                    if (chartdiv) {
+                        chartdiv.style.width = '1800px';
+                        chartdiv.style.overflow = 'visible';
+                    }
+                """)
+                page.wait_for_timeout(1000) # Give AmCharts a second to redraw
+                
                 for day in range(1, 6):
                     try:
                         radio_selector = f"input[type='radio'][value='Day_{day}']"
@@ -407,6 +423,20 @@ def fetch_and_save_district_map_images(target_states=None):
                                 page.locator(radio_selector).click(force=True)
                             page.wait_for_selector("#chartdiv1", state="visible", timeout=30000)
                         
+                        # Re-apply CSS after page reload
+                        page.evaluate("""
+                            document.body.style.width = '1920px';
+                            const maindiv = document.getElementById('maindiv');
+                            if (maindiv) {
+                                maindiv.style.width = '1800px';
+                                maindiv.style.overflow = 'visible';
+                            }
+                            const chartdiv = document.getElementById('chartdiv1');
+                            if (chartdiv) {
+                                chartdiv.style.width = '1800px';
+                                chartdiv.style.overflow = 'visible';
+                            }
+                        """)
                         # Wait a little for the map to fully render if it didn't reload but dynamically updated
                         page.wait_for_timeout(2000)
                         
