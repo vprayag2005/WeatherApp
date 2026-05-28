@@ -449,6 +449,14 @@ def fetch_and_save_district_map_images(target_states=None):
                         # Wait a little for the map to fully render if it didn't reload but dynamically updated
                         page.wait_for_timeout(2000)
                         
+                        # Remove SVG clipping just in case
+                        page.evaluate("""
+                            document.querySelectorAll('svg').forEach(svg => {
+                                svg.style.overflow = 'visible';
+                            });
+                        """)
+                        page.wait_for_timeout(500)
+                        
                         # Smart crop using the SVG group element
                         svgelements = page.query_selector_all("svg")
                         if len(svgelements) > 1:
