@@ -26,9 +26,8 @@ def _fetch_google_news_rss(query: str, hl: str = "en-IN", gl: str = "IN", ceid: 
 
     Returns a list of dicts with keys: headline, news_link, pubDate, source
     """
-    today_str = date.today().strftime("%Y-%m-%d")
-    # Append after: filter to get only today's news; use English locale
-    full_query = f"{query} after:{today_str}"
+    # Fetch the most recent news; use English locale
+    full_query = query
     url = (
         f"https://news.google.com/rss/search"
         f"?q={requests.utils.quote(full_query)}"
@@ -50,9 +49,7 @@ def _fetch_google_news_rss(query: str, hl: str = "en-IN", gl: str = "IN", ceid: 
             pub_date  = date_tag.get_text(strip=True)   if date_tag   else ""
             source    = source_tag.get_text(strip=True) if source_tag else ""
 
-            # Skip articles that are not from today (double-check)
-            if not _is_today(pub_date):
-                continue
+
 
             if headline and news_link:
                 results.append({
