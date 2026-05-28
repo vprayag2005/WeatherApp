@@ -483,13 +483,23 @@ def fetch_and_save_district_map_images(target_states=None):
                                 best_area = area
                                 best_g = g
                                 
-                        if not best_g:
-                            raise Exception("Could not find suitable map group inside SVG")
+                        if best_g:
+                            box = best_g.bounding_box()
                             
-                        buffer = io.BytesIO()
-                        buffer.write(best_g.screenshot(omit_background=True))
-                        buffer.seek(0)
-                        final_bytes = buffer.read()
+                            # Use AmCharts API to perfectly frame the state in the 963x800 container
+                            page.evaluate(f"""
+                                let chart = AmCharts.charts[0];
+                                let padding = 20;
+                                chart.zoomToRectangle({box['x']} - padding, {box['y']} - padding, {box['width']} + padding*2, {box['height']} + padding*2);
+                            """)
+                            
+                            # Wait for the AmCharts zoom animation to complete
+                            page.wait_for_timeout(2000)
+                            
+                            # Capture the entire transparent container (963x800) with the state perfectly framed inside
+                            final_bytes = page.locator("#chartdiv1").screenshot(omit_background=True)
+                        else:
+                            raise Exception("Could not find suitable map group inside SVG")
 
                         os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
                         
