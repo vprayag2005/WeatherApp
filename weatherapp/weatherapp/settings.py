@@ -149,8 +149,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #CELERY SETTINGS
 CELERY_IMPORTS = ('newsapp.tasks',)
 # Celery configuration
-CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Redis as the broker
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Use Redis to store results
+CELERY_BROKER_URL = 'redis://redis:6379/1'  # Redis as the broker
+CELERY_RESULT_BACKEND = 'redis://redis:6379/1'  # Use Redis to store results
 CELERY_ACCEPT_CONTENT = ['json']  # Only accept JSON-serialized tasks
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
