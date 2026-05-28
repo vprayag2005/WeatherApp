@@ -392,8 +392,8 @@ def fetch_and_save_district_map_images(target_states=None):
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        # Use a massive viewport to prevent AmCharts from mathematically clipping the SVGs
-        page = browser.new_page(viewport={"width": 4000, "height": 4000})
+        # Standard viewport. Massive viewports cause Playwright cropping issues for wide states.
+        page = browser.new_page(viewport={"width": 1920, "height": 1080})
         
         for state_name in states_to_process:
             url = DISTRICT_WISE_URLS.get(state_name)
@@ -404,23 +404,6 @@ def fetch_and_save_district_map_images(target_states=None):
                 page.goto(url, wait_until="networkidle")
                 page.wait_for_selector("#maindiv", state="visible", timeout=30000)
                 page.wait_for_selector("#chartdiv1", state="visible", timeout=30000)
-                
-                # Force massive canvas
-                page.evaluate("""
-                    document.body.style.width = '4000px';
-                    document.body.style.height = '4000px';
-                    const maindiv = document.getElementById('maindiv');
-                    if (maindiv) {
-                        maindiv.style.setProperty('width', '3800px', 'important');
-                        maindiv.style.setProperty('height', '3800px', 'important');
-                    }
-                    const chartdiv = document.getElementById('chartdiv1');
-                    if (chartdiv) {
-                        chartdiv.style.setProperty('width', '3800px', 'important');
-                        chartdiv.style.setProperty('height', '3800px', 'important');
-                    }
-                    window.dispatchEvent(new Event('resize'));
-                """)
                 
                 page.wait_for_timeout(1000) # Give AmCharts a second to redraw
                 
@@ -433,20 +416,16 @@ def fetch_and_save_district_map_images(target_states=None):
                         # Wait a little for the map to fully render
                         page.wait_for_timeout(2000)
                         
-                        # ULTIMATE UNCLIP LOGIC: Transparent background + Exact path bounds
+                        # ULTIMATE UNCLIP LOGIC: Remove all clip-paths and force overflow visible
+                        # This prevents AmCharts from mathematically slicing wide/tall states
                         page.evaluate("""
-                            const chartdiv = document.getElementById('chartdiv1');
-                            if (chartdiv) {
-                                chartdiv.style.setProperty('width', '3800px', 'important');
-                                chartdiv.style.setProperty('height', '3800px', 'important');
-                            }
-                            window.dispatchEvent(new Event('resize'));
-                            
-                            // Make all grey/white backgrounds transparent so they don't show up in the image
-                            document.querySelectorAll('rect, path').forEach(el => {
-                                const fill = el.getAttribute('fill');
-                                if (fill === '#ffffff' || fill === '#f1f1f1' || fill === '#eeeeee' || fill === '#e3e3e3') {
-                                    el.setAttribute('fill', 'transparent');
+                            document.querySelectorAll('*').forEach(el => {
+                                if (el.hasAttribute('clip-path')) {
+                                    el.removeAttribute('clip-path');
+                                }
+                                const style = window.getComputedStyle(el);
+                                if (style.overflow === 'hidden' || style.overflow === 'clip') {
+                                    el.style.setProperty('overflow', 'visible', 'important');
                                 }
                             });
                             document.body.style.background = 'transparent';
@@ -455,46 +434,44 @@ def fetch_and_save_district_map_images(target_states=None):
                         # Give AmCharts time to respond
                         page.wait_for_timeout(1000)
                         
-                        # Get exact bounds of only the district map paths
-                        bbox = page.evaluate("""
-                            () => {
-                                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-                                let foundAny = false;
-                                document.querySelectorAll('#chartdiv1 path').forEach(path => {
-                                    const rect = path.getBoundingClientRect();
-                                    // Ignore paths that are practically the entire chart (backgrounds)
-                                    if (rect.width > 0 && rect.height > 0 && rect.width < 3000 && rect.height < 3000) {
-                                        minX = Math.min(minX, rect.x);
-                                        minY = Math.min(minY, rect.y);
-                                        maxX = Math.max(maxX, rect.x + rect.width);
-                                        maxY = Math.max(maxY, rect.y + rect.height);
-                                        foundAny = true;
-                                    }
-                                });
-                                if (!foundAny) return null;
-                                return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
-                            }
-                        """)
+                        # Smart crop using the SVG group element
+                        svgelements = page.query_selector_all("svg")
+                        if len(svgelements) > 1:
+                            svg = svgelements[1]
+                        elif len(svgelements) == 1:
+                            svg = svgelements[0]
+                        else:
+                            raise Exception("No SVG found")
+
+                        svg_box = svg.bounding_box()
+                        svg_area = svg_box['width'] * svg_box['height']
                         
-                        if bbox and bbox['width'] > 0 and bbox['height'] > 0:
-                            # Add a small 10px margin
-                            clip_rect = {
-                                "x": max(0, bbox['x'] - 10),
-                                "y": max(0, bbox['y'] - 10),
-                                "width": bbox['width'] + 20,
-                                "height": bbox['height'] + 20
-                            }
+                        best_g = None
+                        best_area = 0
+                        
+                        for g in svg.query_selector_all("g"):
+                            box = g.bounding_box()
+                            if not box:
+                                continue
+                            area = box['width'] * box['height']
+                            if area > best_area and area < (svg_area * 0.95):
+                                best_area = area
+                                best_g = g
+                                
+                        if not best_g:
+                            raise Exception("Could not find suitable map group inside SVG")
                             
-                            buffer = io.BytesIO()
-                            buffer.write(page.screenshot(clip=clip_rect, omit_background=True))
-                            buffer.seek(0)
-                            final_bytes = buffer.read()
-                            os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
-                            
-                            obj, created = DistrictAlertImage.objects.get_or_create(
-                                state_name=state_name, 
-                                day_number=day
-                            )
+                        buffer = io.BytesIO()
+                        buffer.write(best_g.screenshot(omit_background=True))
+                        buffer.seek(0)
+                        final_bytes = buffer.read()
+
+                        os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+                        
+                        obj, created = DistrictAlertImage.objects.get_or_create(
+                            state_name=state_name, 
+                            day_number=day
+                        )
                             
                         image_name = f"district_alert_{state_name.replace(' ', '_')}_day_{day}.png"
                         obj.image.save(image_name, ContentFile(final_bytes), save=True)
