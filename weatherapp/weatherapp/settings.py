@@ -188,7 +188,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost',
     'http://127.0.0.1',
     'http://40.81.242.15',
-    'https://40.81.242.15'
+    'https://40.81.242.15',
+    'https://clima-weather.centralindia.cloudapp.azure.com'
 ]
 
 CACHES = {
