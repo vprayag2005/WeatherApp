@@ -249,6 +249,21 @@ def _validate_settings_form(form_values):
 
     if not cleaned_values["city"]:
         errors["city"] = "Please enter your city."
+    else:
+        import requests, os
+        apikey = os.getenv('OPENWEATHER_API_KEY')
+        if apikey:
+            try:
+                geo_resp = requests.get(
+                    "https://api.openweathermap.org/geo/1.0/direct",
+                    params={"q": cleaned_values["city"], "limit": 1, "appid": apikey},
+                    timeout=5,
+                )
+                geo_data = geo_resp.json()
+                if not geo_data or (isinstance(geo_data, dict) and "message" in geo_data):
+                    errors["city"] = f"City '{cleaned_values['city']}' was not found in OpenWeatherMap."
+            except Exception:
+                pass  # Ignore network errors to avoid locking out the user
 
     if not cleaned_values["country"]:
         errors["country"] = "Please enter your country."
