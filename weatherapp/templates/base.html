@@ -5,12 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather App</title>
+    <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/png">
     {% block css_link %}{% endblock  %}
 </head>
 <body>
     <nav class="navbar navbar-expand-lg bg-dark " id="nav-colour">
         <div class="container-fluid">
-          <a class="navbar-brand text-white" href="#">Clima</a>
+          <span class="navbar-brand text-white">Clima</span>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
