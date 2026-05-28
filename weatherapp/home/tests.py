@@ -38,6 +38,23 @@ class UserSettingsFlowTests(TestCase):
         self.assertContains(home_response, "Chennai, Tamil Nadu, India")
         self.assertContains(home_response, 'savedHomeQuery: "Chennai"')
 
+    def test_navbar_uses_saved_settings_links_after_setup(self):
+        self.client.cookies["visitor_id"] = "navbar-visitor"
+        UserSettings.objects.create(
+            visitor_id="navbar-visitor",
+            city="Chennai",
+            country="India",
+            state="Tamil Nadu",
+        )
+
+        response = self.client.get(reverse("home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'href="/news/globalweathernews/"')
+        self.assertContains(response, 'href="/news/nationalweathernews/"')
+        self.assertContains(response, 'href="/news/stateweathernews/"')
+        self.assertContains(response, 'href="/radar/"')
+
     def test_home_page_loads_saved_city_config_before_weather_script(self):
         self.client.cookies["visitor_id"] = "saved-city-visitor"
         UserSettings.objects.create(
