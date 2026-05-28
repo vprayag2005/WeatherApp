@@ -392,8 +392,9 @@ def fetch_and_save_district_map_images(target_states=None):
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        # Taller viewport for more bottom space and wider for wide states
-        page = browser.new_page(viewport={"width": 1920, "height": 1200})
+        # Taller and MASSIVE viewport for wide states like Arunachal Pradesh
+        # This completely prevents AmCharts from dynamically clipping the SVG boundaries
+        page = browser.new_page(viewport={"width": 3500, "height": 2000})
         
         for state_name in states_to_process:
             url = DISTRICT_WISE_URLS.get(state_name)
@@ -407,20 +408,6 @@ def fetch_and_save_district_map_images(target_states=None):
                 page.wait_for_selector("#maindiv", state="visible", timeout=30000)
                 page.wait_for_selector("#chartdiv1", state="visible", timeout=30000)
                 
-                # Force the container to be wide enough so states like Arunachal Pradesh are never cut off
-                page.evaluate("""
-                    document.body.style.width = '1920px';
-                    const maindiv = document.getElementById('maindiv');
-                    if (maindiv) {
-                        maindiv.style.width = '1800px';
-                        maindiv.style.overflow = 'visible';
-                    }
-                    const chartdiv = document.getElementById('chartdiv1');
-                    if (chartdiv) {
-                        chartdiv.style.width = '1800px';
-                        chartdiv.style.overflow = 'visible';
-                    }
-                """)
                 page.wait_for_timeout(1000) # Give AmCharts a second to redraw
                 
                 for day in range(1, 6):
@@ -432,33 +419,8 @@ def fetch_and_save_district_map_images(target_states=None):
                                 page.locator(radio_selector).click(force=True)
                             page.wait_for_selector("#chartdiv1", state="visible", timeout=30000)
                         
-                        # Re-apply CSS after page reload
-                        page.evaluate("""
-                            document.body.style.width = '1920px';
-                            const maindiv = document.getElementById('maindiv');
-                            if (maindiv) {
-                                maindiv.style.width = '1800px';
-                                maindiv.style.overflow = 'visible';
-                            }
-                            const chartdiv = document.getElementById('chartdiv1');
-                            if (chartdiv) {
-                                chartdiv.style.width = '1800px';
-                                chartdiv.style.overflow = 'visible';
-                            }
-                        """)
-                        # Remove ALL clipping restrictions across the entire DOM so no wide states are cut off
-                        page.evaluate("""
-                            document.body.style.width = '3000px';
-                            document.body.style.height = '3000px';
-                            const els = document.querySelectorAll('*');
-                            els.forEach(el => {
-                                const style = window.getComputedStyle(el);
-                                if (style.overflow === 'hidden' || style.overflow === 'clip') {
-                                    el.style.overflow = 'visible';
-                                }
-                            });
-                        """)
-                        page.wait_for_timeout(1000)
+                        # Wait a little for the map to fully render if it didn't reload but dynamically updated
+                        page.wait_for_timeout(2000)
                         
                         # Smart crop using the SVG group element
                         svgelements = page.query_selector_all("svg")
