@@ -409,6 +409,10 @@ def fetch_and_save_district_map_images(target_states=None):
                 
                 for day in range(1, 6):
                     try:
+                        if day > 1:
+                            page.reload(wait_until="networkidle")
+                            page.wait_for_timeout(1000)
+                            
                         radio_selector = f"input[type='radio'][value='Day_{day}']"
                         if page.locator(radio_selector).count() > 0:
                             page.locator(radio_selector).click(force=True)
@@ -429,20 +433,26 @@ def fetch_and_save_district_map_images(target_states=None):
                                     el.style.setProperty('overflow', 'visible', 'important');
                                 }
                             });
-                            
-                            // Hide UI elements that might overlap the map when overflow is visible
-                            document.querySelectorAll('header, footer, nav, .header, .navbar, .top-nav, .footer, iframe').forEach(el => {
-                                if (el) el.style.setProperty('display', 'none', 'important');
-                            });
-                            
-                            // Remove borders on containers that might draw over the overflowing map
-                            document.querySelectorAll('#maindiv, #chartdiv1, .container, .row').forEach(el => {
-                                if (el) {
-                                    el.style.setProperty('border', 'none', 'important');
-                                    el.style.setProperty('box-shadow', 'none', 'important');
-                                    el.style.setProperty('background', 'transparent', 'important');
+                            // Hide all overlapping UI elements by hiding all siblings of the chart and its ancestors
+                            let current = document.getElementById('chartdiv1');
+                            while (current && current !== document.body) {
+                                current.style.setProperty('border', 'none', 'important');
+                                current.style.setProperty('box-shadow', 'none', 'important');
+                                current.style.setProperty('background', 'transparent', 'important');
+                                current.style.setProperty('margin', '0', 'important');
+                                current.style.setProperty('padding', '0', 'important');
+                                
+                                let parent = current.parentElement;
+                                if (parent) {
+                                    for (let i = 0; i < parent.children.length; i++) {
+                                        let child = parent.children[i];
+                                        if (child !== current) {
+                                            child.style.setProperty('display', 'none', 'important');
+                                        }
+                                    }
                                 }
-                            });
+                                current = parent;
+                            }
                             
                             document.body.style.background = 'transparent';
                         """)
@@ -452,12 +462,11 @@ def fetch_and_save_district_map_images(target_states=None):
                         
                         # Smart crop using the SVG group element
                         svgelements = page.query_selector_all("svg")
-                        if len(svgelements) > 1:
-                            svg = svgelements[1]
-                        elif len(svgelements) == 1:
-                            svg = svgelements[0]
-                        else:
+                        if not svgelements:
                             raise Exception("No SVG found")
+                            
+                        # The map SVG is always the largest one by area
+                        svg = max(svgelements, key=lambda s: s.bounding_box()['width'] * s.bounding_box()['height'] if s.bounding_box() else 0)
 
                         svg_box = svg.bounding_box()
                         svg_area = svg_box['width'] * svg_box['height']
