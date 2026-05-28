@@ -194,8 +194,8 @@ def build_available_days(source_date):
 def build_feature_collection(alerts):
     alerts = list(alerts)
     source_date = next((alert.source_date for alert in alerts if alert.source_date), None)
-    source_updated_at = next(
-        (alert.source_updated_at for alert in alerts if alert.source_updated_at),
+    synced_at = next(
+        (alert.synced_at for alert in alerts if alert.synced_at),
         None,
     )
 
@@ -233,8 +233,8 @@ def build_feature_collection(alerts):
         "type": "FeatureCollection",
         "metadata": {
             "source_date": source_date.isoformat() if source_date else "",
-            "source_updated_at": source_updated_at.isoformat()
-            if source_updated_at
+            "source_updated_at": synced_at.isoformat()
+            if synced_at
             else "",
             "available_days": build_available_days(source_date),
             "legend": [
