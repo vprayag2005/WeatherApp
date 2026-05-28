@@ -370,12 +370,21 @@ DISTRICT_WISE_URLS = {
 }
 
 
+DISTRICT_CROP_CONFIGS = {
+    # Example config: "State Name": (x, y, width, height)
+    # Add coordinates here as you find them locally
+    # "Andhra Pradesh": (100, 50, 800, 600),
+}
+
+
 def fetch_and_save_district_map_images(target_states=None):
     from playwright.sync_api import sync_playwright
     from django.core.files.base import ContentFile
     from alertsapp.models import DistrictAlertImage
     import logging
     import os
+    import io
+    from PIL import Image
 
     logger = logging.getLogger(__name__)
 
@@ -445,13 +454,28 @@ def fetch_and_save_district_map_images(target_states=None):
                         screenshot_bytes = maindiv.screenshot()
 
                         os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
-                        image_name = f"district_alert_{state_name.replace(' ', '_')}_day_{day}.png"
                         
                         obj, created = DistrictAlertImage.objects.get_or_create(
                             state_name=state_name, 
                             day_number=day
                         )
-                        obj.image.save(image_name, ContentFile(screenshot_bytes), save=True)
+                        
+                        if state_name in DISTRICT_CROP_CONFIGS:
+                            try:
+                                pil_image = Image.open(io.BytesIO(screenshot_bytes))
+                                x, y, w, h = DISTRICT_CROP_CONFIGS[state_name]
+                                cropped = pil_image.crop((x, y, x + w, y + h))
+                                output_io = io.BytesIO()
+                                cropped.save(output_io, format='PNG')
+                                final_bytes = output_io.getvalue()
+                            except Exception as e:
+                                logger.error(f"Error cropping image for {state_name}: {e}")
+                                final_bytes = screenshot_bytes
+                        else:
+                            final_bytes = screenshot_bytes
+                            
+                        image_name = f"district_alert_{state_name.replace(' ', '_')}_day_{day}.png"
+                        obj.image.save(image_name, ContentFile(final_bytes), save=True)
                         
                         action = "Created" if created else "Updated"
                         logger.info(f"{action} image record for {state_name} day {day}")
