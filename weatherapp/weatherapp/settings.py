@@ -160,9 +160,9 @@ CELERY_TIMEZONE = 'UTC'
 # Celery Beat settings (Periodic Task configuration)
 
 CELERY_BEAT_SCHEDULE = {
-    'run-scraper-every-3-hours': {
-        'task': 'newsapp.tasks.run_scraper_task',  # Replace with your actual task name
-        'schedule': timedelta(minutes=2),  # Runs every 3 hours
+    'run-scraper-every-9-hours': {
+        'task': 'newsapp.tasks.run_scraper_task',
+        'schedule': timedelta(hours=9),
     },
     'sync-subdivision-alerts': {
         'task': 'alertsapp.tasks.sync_subdivision_alerts_task',
