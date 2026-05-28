@@ -57,14 +57,9 @@ function fillLocationFields(location) {
 				}
 				stateInput.value = location.state;
 				
-				fetchCities(location.country, location.state).then(() => {
-					if (cityInput && location.city) {
-						if (![...cityInput.options].some(o => o.value === location.city)) {
-							cityInput.add(new Option(location.city, location.city));
-						}
-						cityInput.value = location.city;
-					}
-				});
+				if (cityInput && location.city) {
+					cityInput.value = location.city;
+				}
 			}
 		});
 	}
@@ -169,37 +164,11 @@ async function fetchStates(country) {
 	}
 }
 
-async function fetchCities(country, state) {
-	if (!country || !state) {
-		populateSelect(cityInput, [], cityInput.value);
-		return;
-	}
-	try {
-		const response = await fetch("https://countriesnow.space/api/v0.1/countries/state/cities", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ country: country, state: state })
-		});
-		const payload = await response.json();
-		if (payload && !payload.error) {
-			const cities = payload.data;
-			populateSelect(cityInput, cities, cityInput.value);
-		}
-	} catch (e) {
-		console.error("Failed to fetch cities", e);
-	}
-}
+// fetchCities removed because city is now a text input
 
 if (countryInput) {
 	countryInput.addEventListener("change", (e) => {
 		fetchStates(e.target.value);
-		populateSelect(cityInput, [], "");
-	});
-}
-
-if (stateInput) {
-	stateInput.addEventListener("change", (e) => {
-		fetchCities(countryInput.value, e.target.value);
 	});
 }
 
@@ -207,9 +176,6 @@ async function initializeDropdowns() {
 	await fetchCountries();
 	if (countryInput && countryInput.value) {
 		await fetchStates(countryInput.value);
-		if (stateInput && stateInput.value) {
-			await fetchCities(countryInput.value, stateInput.value);
-		}
 	}
 }
 

@@ -82,12 +82,7 @@
 
                     <div class="field-group">
                         <label for="settings-city">City</label>
-                        <select id="settings-city" name="city" autocomplete="address-level2" class="{% if form_errors.city %}has-error{% endif %}">
-                            <option value="">Select your city</option>
-                            {% if form_values.city %}
-                            <option value="{{ form_values.city }}" selected>{{ form_values.city }}</option>
-                            {% endif %}
-                        </select>
+                        <input type="text" id="settings-city" name="city" placeholder="Enter your city name" autocomplete="address-level2" class="{% if form_errors.city %}has-error{% endif %}" value="{{ form_values.city|default:'' }}">
                         {% if form_errors.city %}<p class="field-error">{{ form_errors.city }}</p>{% endif %}
                     </div>
                 </div>
