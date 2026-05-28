@@ -38,4 +38,4 @@ RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Default command
-CMD ["gunicorn", "weatherapp.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "weatherapp.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4", "--threads", "4"]
