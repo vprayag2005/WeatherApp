@@ -418,6 +418,7 @@ def fetch_and_save_district_map_images(target_states=None):
                         
                         # ULTIMATE UNCLIP LOGIC: Remove all clip-paths and force overflow visible
                         # This prevents AmCharts from mathematically slicing wide/tall states
+                        # Also hide all overlapping UI elements (headers, navbars) and container borders
                         page.evaluate("""
                             document.querySelectorAll('*').forEach(el => {
                                 if (el.hasAttribute('clip-path')) {
@@ -428,6 +429,21 @@ def fetch_and_save_district_map_images(target_states=None):
                                     el.style.setProperty('overflow', 'visible', 'important');
                                 }
                             });
+                            
+                            // Hide UI elements that might overlap the map when overflow is visible
+                            document.querySelectorAll('header, footer, nav, .header, .navbar, .top-nav, .footer, iframe').forEach(el => {
+                                if (el) el.style.setProperty('display', 'none', 'important');
+                            });
+                            
+                            // Remove borders on containers that might draw over the overflowing map
+                            document.querySelectorAll('#maindiv, #chartdiv1, .container, .row').forEach(el => {
+                                if (el) {
+                                    el.style.setProperty('border', 'none', 'important');
+                                    el.style.setProperty('box-shadow', 'none', 'important');
+                                    el.style.setProperty('background', 'transparent', 'important');
+                                }
+                            });
+                            
                             document.body.style.background = 'transparent';
                         """)
                         
