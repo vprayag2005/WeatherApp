@@ -1,27 +1,46 @@
-# WeatherApp 🌤️
+# Clima - Indian Weather Portal
 
 ## Overview
-WeatherApp is a personal weather portal built with **Django** and **MySQL**. It provides Indian users with real‑time weather data, 5‑day forecasts, hourly updates, and region‑specific weather news. The site is designed for simplicity, speed, and easy extensibility.
+
+Clima is a comprehensive weather portal designed specifically for users in India. Built with Django, it provides a centralized platform to track real-time weather conditions, forecasts, and official severe weather warnings across the country. 
+
+The project aims to take raw, often hard-to-read meteorological data (such as official warnings from the India Meteorological Department) and present it in a highly visual, easy-to-understand, and modern dark-themed interface.
 
 ## Core Features
-- **Current Weather** – Live temperature, humidity, wind, and condition icons for any Indian city.
-- **5‑Day Forecast** – Daily high/low, precipitation chance, and summary.
-- **Hourly Updates** – Fine‑grained hourly view for short‑term planning.
-- **News Feed** – Aggregated weather news; initially focused on Kerala, with plans to expand nationwide.
-- **Responsive UI** – Clean, mobile‑first design using vanilla CSS and JavaScript.
 
-## Planned Enhancements
-- **Weather Alerts** – Push red‑alert emails and in‑app notifications for severe weather.
-- **Nowcast Map** – Real‑time alert overlay on an interactive map.
-- **National & State Coverage** – Extend news and forecasts to all Indian states.
-- **Community Stories** – Let users share weather experiences and photos.
+- **Personalized Dashboard**
+  Users can save their location settings to automatically receive weather data and regional news tailored to their specific state and city.
+
+- **Real-Time Weather & Forecasts**
+  Search for any city to view current conditions (temperature, humidity, wind), along with detailed 5-day forecasts and hourly breakdowns for short-term planning.
+
+- **Official IMD Weather Alerts**
+  The platform integrates directly with the India Meteorological Department (IMD) to provide up-to-date severe weather warnings.
+  - **Statewise Alerts:** View color-coded subdivision warnings across India.
+  - **Districtwise Alerts:** Inspect detailed, interactive maps highlighting specific weather warnings (heavy rain, heatwaves, etc.) down to the district level for the next 5 days.
+
+- **Aggregated News Feed**
+  Stay informed with a curated weather and climate news feed, filtered by Global, National, and Regional scopes based on your saved location.
+
+- **Premium UI / UX**
+  The interface is built with a mobile-first approach, featuring a custom dark mode, glassmorphism design elements, and smooth micro-animations to make weather tracking an enjoyable visual experience.
+
+## Technical Stack
+
+- **Backend:** Python, Django
+- **Database:** MySQL
+- **Background Processing:** Celery & Redis (used for asynchronously syncing heavy map data from official sources)
+- **Scraping:** Playwright (used to render and capture complex mapping layers)
+- **Deployment:** Docker, Docker Compose, Gunicorn, WhiteNoise
 
 ## Installation & Setup
-1. **Clone the repo**
+
+1. **Clone the repository**
    ```bash
    git clone https://github.com/vprayag2005/WeatherApp.git
    cd WeatherApp
    ```
+
 2. **Create a virtual environment**
    ```bash
    python -m venv venv
@@ -30,42 +49,37 @@ WeatherApp is a personal weather portal built with **Django** and **MySQL**. It 
    # macOS/Linux
    source venv/bin/activate
    ```
+
 3. **Install dependencies**
    ```bash
    pip install -r requirements.txt
+   playwright install chromium
    ```
+
 4. **Configure the database**
-   - Install MySQL and start the service.
+   - Install MySQL and ensure the service is running.
    - Create a database (e.g., `weatherapp`).
-   - Copy `.env.example` to `.env` and fill in `DB_NAME`, `DB_USER`, `DB_PASSWORD`, etc.
+   - Copy `.env.example` to `.env` and fill in your database credentials.
+
 5. **Run migrations**
    ```bash
    python manage.py migrate
    ```
+
 6. **Start the development server**
    ```bash
    python manage.py runserver
    ```
-   Visit `http://127.0.0.1:8000/` in your browser.
+   You can now visit `http://127.0.0.1:8000/` in your browser.
 
 ## Docker Deployment (Production)
-We ship a multi‑stage Docker build ready for production:
+
+For production deployment, the project includes a multi-stage Docker setup that runs the Django application (via Gunicorn), the Celery worker for background tasks, and a Redis message broker.
+
 ```bash
 docker compose up -d --build
 ```
-The container runs **Gunicorn** behind **WhiteNoise** for efficient static file handling and uses **Redis** for caching and Celery task queues.
-
-## Contributing
-This project is primarily personal, but contributions are welcome:
-- Open an issue for bugs or feature ideas.
-- Submit a pull request with clear commit messages.
 
 ## License
-MIT License – feel free to fork and adapt.
 
-## Acknowledgements
-- **Django** – the powerful web framework.
-- **MySQL** – reliable relational database.
-- **Gunicorn** – WSGI HTTP server for production.
-- **WhiteNoise** – static file serving.
-- **Redis** – caching and Celery broker.
+This project is licensed under the MIT License. Feel free to fork, explore, and adapt the code for your own uses.
