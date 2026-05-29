@@ -1,4 +1,4 @@
-# Clima: A Modern Weather & Alerts Portal for India
+# Clima
 
 ## Overview
 
