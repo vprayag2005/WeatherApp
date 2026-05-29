@@ -8,10 +8,6 @@
     <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/png">
     {% block css_link %}{% endblock  %}
     <style>
-        /* Force the mobile hamburger menu icon to be white */
-        .navbar-toggler-icon {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2.5' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
-        }
         .navbar-toggler {
             border-color: rgba(255, 255, 255, 0.2) !important;
         }
@@ -24,8 +20,10 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="nav-colour">
         <div class="container-fluid">
           <span class="navbar-brand text-white">Clima</span>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation" style="border-color: rgba(255,255,255,0.5); padding: 4px 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#ffffff" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+            </svg>
           </button>
           <div class="collapse navbar-collapse ps-4" id="navbarNavDropdown">
             <ul class="navbar-nav">
