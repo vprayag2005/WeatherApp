@@ -51,7 +51,7 @@
                     <label for="state-select">State/UT</label>
                     <select id="state-select" class="form-select" style="margin-top: 8px;">
                         {% for state_name in states_list %}
-                            <option value="{{ state_name }}" {% if state_name|lower == preferred_state|lower %}selected{% endif %}>{{ state_name }}</option>
+                            <option value="{{ state_name }}" {% if preferred_state and preferred_state|lower in state_name|lower %}selected{% endif %}>{{ state_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
