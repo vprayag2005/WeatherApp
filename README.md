@@ -22,8 +22,7 @@ The project aims to take raw, often hard-to-read meteorological data (such as of
 - **Aggregated News Feed**
   Stay informed with a curated weather and climate news feed, filtered by Global, National, and Regional scopes based on your saved location.
 
-- **Premium UI / UX**
-  The interface is built with a mobile-first approach, featuring a custom dark mode, glassmorphism design elements, and smooth micro-animations to make weather tracking an enjoyable visual experience.
+
 
 ## Technical Stack
 
@@ -72,12 +71,5 @@ The project aims to take raw, often hard-to-read meteorological data (such as of
    ```
    You can now visit `http://127.0.0.1:8000/` in your browser.
 
-## Docker Deployment (Production)
-
-For production deployment, the project includes a multi-stage Docker setup that runs the Django application (via Gunicorn), the Celery worker for background tasks, and a Redis message broker.
-
-```bash
-docker compose up -d --build
-```
 
 
