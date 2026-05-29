@@ -6,3 +6,6 @@ __pycache__/
 celerybeat-schedule*
 weatherapp/media/
 staticfiles/
+DEPLOYMENT.md
+Azure.md
+azure.md
