@@ -11,7 +11,7 @@
                 <p class="alerts-eyebrow">IMD Live Warning Layer</p>
                 <h1 class="alerts-title">Districtwise weather alerts</h1>
                 <p class="alerts-copy">
-                    Select a state below to view the official districtwise warning layer directly from the IMD website.
+                    Select a State/UT below to view the official districtwise warning layer directly from the IMD website.
                 </p>
                 
                 <div style="margin-top: 24px;">
@@ -45,10 +45,10 @@
 
             <div class="alerts-control-card">
                 <h2>Filter the alert view</h2>
-                <p>Choose the state and day you want to inspect.</p>
+                <p>Choose the State/UT and day you want to inspect.</p>
 
                 <div class="alert-control">
-                    <label for="state-select">State</label>
+                    <label for="state-select">State/UT</label>
                     <select id="state-select" class="form-select" style="margin-top: 8px;">
                         {% for state_name in states_list %}
                             <option value="{{ state_name }}" {% if state_name == preferred_state %}selected{% endif %}>{{ state_name }}</option>
