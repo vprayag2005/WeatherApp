@@ -414,13 +414,16 @@ def fetch_and_save_district_map_images(target_states=None):
                     try:
                         if day > 1:
                             page.reload(wait_until="networkidle")
+                            page.wait_for_selector("#maindiv", state="visible", timeout=30000)
+                            page.wait_for_selector("#chartdiv1", state="visible", timeout=30000)
                             page.wait_for_timeout(1000)
                             
                         radio_selector = f"input[type='radio'][value='Day_{day}']"
                         if page.locator(radio_selector).count() > 0:
                             page.locator(radio_selector).click(force=True)
                             
-                        # Wait a little for the map to fully render
+                        # Wait a little for the map to fully render and the SVG to be injected
+                        page.wait_for_selector("#chartdiv1 svg", state="visible", timeout=15000)
                         page.wait_for_timeout(2000)
                         
                         # ULTIMATE UNCLIP LOGIC: Remove all clip-paths and force overflow visible
@@ -489,18 +492,16 @@ def fetch_and_save_district_map_images(target_states=None):
                         if best_g:
                             box = best_g.bounding_box()
                             
-                            # Use AmCharts API to perfectly frame the state in the 963x800 container
-                            page.evaluate(f"""
-                                let chart = AmCharts.charts[0];
-                                let padding = 20;
-                                chart.zoomToRectangle({box['x']} - padding, {box['y']} - padding, {box['width']} + padding*2, {box['height']} + padding*2);
-                            """)
+                            padding = 20
+                            clip_box = {
+                                "x": max(0, box['x'] - padding),
+                                "y": max(0, box['y'] - padding),
+                                "width": box['width'] + padding * 2,
+                                "height": box['height'] + padding * 2
+                            }
                             
-                            # Wait for the AmCharts zoom animation to complete
-                            page.wait_for_timeout(2000)
-                            
-                            # Capture the entire transparent container (963x800) with the state perfectly framed inside
-                            final_bytes = page.locator("#chartdiv1").screenshot(omit_background=True)
+                            # Capture the map perfectly framed using Playwright's native clipping
+                            final_bytes = page.screenshot(clip=clip_box, omit_background=True)
                         else:
                             raise Exception("Could not find suitable map group inside SVG")
 
