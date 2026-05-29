@@ -29,6 +29,19 @@ def districtwise_alerts(request):
             image_dict[img.state_name][str(img.day_number)] = img.image.url
 
     import json
+    import datetime
+    
+    # Generate dates for Day 1 to Day 5 in IST
+    ist_tz = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+    today = datetime.datetime.now(tz=ist_tz).date()
+    days_list = []
+    for i in range(1, 6):
+        target_date = today + datetime.timedelta(days=i - 1)
+        days_list.append({
+            "value": i,
+            "label": f"Day {i} - {target_date.strftime('%b %d, %Y')}"
+        })
+
     return render(
         request,
         "districtwise_alerts.html",
@@ -36,6 +49,7 @@ def districtwise_alerts(request):
             "states_list": list(DISTRICT_WISE_URLS.keys()),
             "preferred_state": getattr(getattr(request, "user_settings", None), "state", ""),
             "images_dict": json.dumps(image_dict),
+            "days_list": days_list,
         },
     )
 

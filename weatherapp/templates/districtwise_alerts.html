@@ -59,11 +59,9 @@
                 <div class="alert-control" style="margin-top: 16px;">
                     <label for="day-select">Warning Day</label>
                     <select id="day-select" class="form-select" style="margin-top: 8px;">
-                        <option value="1">Day 1</option>
-                        <option value="2">Day 2</option>
-                        <option value="3">Day 3</option>
-                        <option value="4">Day 4</option>
-                        <option value="5">Day 5</option>
+                        {% for day in days_list %}
+                            <option value="{{ day.value }}">{{ day.label }}</option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>
