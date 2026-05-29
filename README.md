@@ -80,6 +80,4 @@ For production deployment, the project includes a multi-stage Docker setup that 
 docker compose up -d --build
 ```
 
-## License
 
-This project is licensed under the MIT License. Feel free to fork, explore, and adapt the code for your own uses.
